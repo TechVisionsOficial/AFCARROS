@@ -1,0 +1,272 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PapelUsuario {
+  DONO
+  EQUIPE
+}
+
+enum TipoVeiculo {
+  CARRO
+  MOTO
+}
+
+enum CondicaoVeiculo {
+  NOVO
+  SEMINOVO
+}
+
+enum StatusVeiculo {
+  DISPONIVEL
+  RESERVADO
+  VENDIDO
+}
+
+enum OrigemAquisicao {
+  LEILAO
+  TROCA
+  PARTICULAR
+  CONSIGNADO
+  OUTRO
+}
+
+enum CategoriaGasto {
+  MANUTENCAO
+  DOCUMENTACAO
+  ESTETICA
+  FUNILARIA
+  OUTROS
+}
+
+enum CategoriaDocumento {
+  LAUDO
+  DOCUMENTACAO
+  TRANSFERENCIA
+  IPVA
+  VISTORIA
+  OUTRO
+}
+
+enum OrigemLead {
+  SITE
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  INDICACAO
+  OUTRO
+}
+
+enum StatusKanban {
+  NOVO
+  ENTRAR_EM_CONTATO
+  AGUARDANDO_CLIENTE
+  RETORNAR_PARA_CLIENTE
+  NEGOCIANDO
+  VENDA_CONCLUIDA
+  PERDIDO
+}
+
+enum QualidadeRelacao {
+  VERDE
+  AMARELO
+  VERMELHO
+}
+
+enum StatusPedido {
+  ABERTO
+  ATENDIDO
+  CANCELADO
+}
+
+enum StatusOferta {
+  ABERTA
+  RECUSADA
+  COMPRADA
+}
+
+enum PapelMensagemAI {
+  USUARIO
+  ASSISTENTE
+}
+
+model Usuario {
+  id         String       @id @default(uuid())
+  nome       String
+  email      String       @unique
+  senhaHash  String       @map("senha_hash")
+  papel      PapelUsuario
+  criadoEm   DateTime     @default(now()) @map("criado_em")
+  leads      Lead[]
+
+  @@map("usuarios")
+}
+
+model Veiculo {
+  id               String            @id @default(uuid())
+  tipo             TipoVeiculo
+  marca            String
+  modelo           String
+  ano              Int
+  km               Int
+  condicao         CondicaoVeiculo
+  status           StatusVeiculo     @default(DISPONIVEL)
+  descricao        String?
+  precoVenda       Decimal           @map("preco_venda") @db.Decimal(12, 2)
+  precoCompra      Decimal           @map("preco_compra") @db.Decimal(12, 2)
+  precoMinimo      Decimal           @map("preco_minimo") @db.Decimal(12, 2)
+  precoVendaReal   Decimal?          @map("preco_venda_real") @db.Decimal(12, 2)
+  dataAquisicao    DateTime?         @map("data_aquisicao")
+  vendidoEm        DateTime?         @map("vendido_em")
+  origemAquisicao  OrigemAquisicao?  @map("origem_aquisicao")
+  fornecedorId     String?           @map("fornecedor_id")
+  compradorId      String?           @map("comprador_id")
+  criadoEm         DateTime          @default(now()) @map("criado_em")
+  atualizadoEm     DateTime          @updatedAt @map("atualizado_em")
+
+  fotos            VeiculoFoto[]
+  documentos       VeiculoDocumento[]
+  gastos           Gasto[]
+  leads            Lead[]
+  fornecedor       Cliente?          @relation("fornecedor", fields: [fornecedorId], references: [id], onDelete: SetNull)
+  comprador        Cliente?          @relation("comprador", fields: [compradorId], references: [id], onDelete: SetNull)
+
+  @@map("veiculos")
+}
+
+model VeiculoDocumento {
+  id        String             @id @default(uuid())
+  veiculoId String             @map("veiculo_id")
+  categoria CategoriaDocumento
+  nome      String
+  url       String
+  criadoEm  DateTime           @default(now()) @map("criado_em")
+
+  veiculo   Veiculo            @relation(fields: [veiculoId], references: [id], onDelete: Cascade)
+
+  @@map("veiculo_documentos")
+}
+
+model VeiculoFoto {
+  id        String  @id @default(uuid())
+  veiculoId String  @map("veiculo_id")
+  url       String
+  ordem     Int     @default(0)
+
+  veiculo   Veiculo @relation(fields: [veiculoId], references: [id], onDelete: Cascade)
+
+  @@map("veiculo_fotos")
+}
+
+model Gasto {
+  id          String         @id @default(uuid())
+  veiculoId   String         @map("veiculo_id")
+  categoria   CategoriaGasto
+  valor       Decimal        @db.Decimal(12, 2)
+  descricao   String?
+  data        DateTime       @db.Date
+
+  veiculo     Veiculo        @relation(fields: [veiculoId], references: [id], onDelete: Cascade)
+
+  @@map("gastos")
+}
+
+model Cliente {
+  id                String           @id @default(uuid())
+  nome              String
+  telefone          String?
+  email             String?
+  qualidadeRelacao  QualidadeRelacao @default(VERDE) @map("qualidade_relacao")
+  veiculosComprados Int              @default(0) @map("veiculos_comprados") // legado, não usado — contagem agora é automática via comprasDaLoja
+  criadoEm          DateTime         @default(now()) @map("criado_em")
+
+  leads             Lead[]
+  pedidos           Pedido[]
+  ofertas           Oferta[]
+  vendasParaLoja    Veiculo[]        @relation("fornecedor")
+  comprasDaLoja     Veiculo[]        @relation("comprador")
+
+  @@map("clientes")
+}
+
+model Pedido {
+  id         String       @id @default(uuid())
+  clienteId  String       @map("cliente_id")
+  tipo       TipoVeiculo
+  descricao  String
+  observacao String?
+  status     StatusPedido @default(ABERTO)
+  criadoEm   DateTime     @default(now()) @map("criado_em")
+
+  cliente    Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@map("pedidos")
+}
+
+model Oferta {
+  id          String       @id @default(uuid())
+  clienteId   String       @map("cliente_id")
+  tipo        TipoVeiculo
+  marca       String
+  modelo      String
+  ano         Int?
+  km          Int?
+  precoPedido Decimal?     @map("preco_pedido") @db.Decimal(12, 2)
+  observacao  String?
+  status      StatusOferta @default(ABERTA)
+  criadoEm    DateTime     @default(now()) @map("criado_em")
+
+  cliente     Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  fotos       OfertaFoto[]
+
+  @@map("ofertas")
+}
+
+model OfertaFoto {
+  id       String @id @default(uuid())
+  ofertaId String @map("oferta_id")
+  url      String
+  ordem    Int    @default(0)
+
+  oferta   Oferta @relation(fields: [ofertaId], references: [id], onDelete: Cascade)
+
+  @@map("oferta_fotos")
+}
+
+model Lead {
+  id              String       @id @default(uuid())
+  clienteId       String       @map("cliente_id")
+  veiculoId       String?      @map("veiculo_id")
+  responsavelId   String?      @map("responsavel_id")
+  origem          OrigemLead
+  statusKanban    StatusKanban @default(NOVO) @map("status_kanban")
+  criadoEm        DateTime     @default(now()) @map("criado_em")
+  atualizadoEm    DateTime     @updatedAt @map("atualizado_em")
+
+  cliente         Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  veiculo         Veiculo?     @relation(fields: [veiculoId], references: [id], onDelete: SetNull)
+  responsavel     Usuario?     @relation(fields: [responsavelId], references: [id], onDelete: SetNull)
+
+  @@map("leads")
+}
+
+// Histórico de conversas do AFCARROS AI. Serve de memória do assistente
+// (conversas anteriores viram contexto) e alimenta a aba de status/uso.
+model MensagemAI {
+  id            String          @id @default(uuid())
+  papel         PapelMensagemAI
+  conteudo      String          @db.Text
+  tokensEntrada Int?            @map("tokens_entrada")
+  tokensSaida   Int?            @map("tokens_saida")
+  criadoEm      DateTime        @default(now()) @map("criado_em")
+
+  @@map("mensagens_ai")
+}

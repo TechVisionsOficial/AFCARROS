@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #141416;
+  --brand-red: #da1f2b;
+  --brand-graphite: #141416;
+  --brand-gray: #6f6d66;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-red: var(--brand-red);
+  --color-brand-graphite: var(--brand-graphite);
+  --color-brand-gray: var(--brand-gray);
+  --font-wordmark: var(--font-wordmark);
+  --font-support: var(--font-support);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-support), Arial, Helvetica, sans-serif;
+}
+
+/*
+  Animações de entrada em CSS puro.
+  IMPORTANTE: o estado de repouso (sem animação) é SEMPRE visível — o conteúdo
+  nunca depende de JavaScript para aparecer. Isso garante que funcione em
+  qualquer aparelho, mesmo se o JS falhar ou o navegador desativar animações.
+*/
+@keyframes af-reveal-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes af-reveal-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes af-reveal-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes af-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .af-reveal { animation: af-reveal-up 0.7s ease-out both; }
+  .af-reveal-left { animation: af-reveal-left 0.7s ease-out both; }
+  .af-reveal-right { animation: af-reveal-right 0.7s ease-out both; }
+  .af-delay-1 { animation-delay: 0.1s; }
+  .af-delay-2 { animation-delay: 0.2s; }
+  .af-delay-3 { animation-delay: 0.3s; }
+  .af-bounce { animation: af-bounce 1.4s ease-in-out infinite; }
+}
+
+/*
+  Revelar ao rolar (usado pelo componente <AoRolar>).
+  MESMA REGRA: o repouso é visível. A classe `.af-rolar-oculto` — a única que
+  esconde — é aplicada só pelo JavaScript, depois de ele já estar rodando.
+  Sem JS, nada esconde. Com "reduzir movimento", as regras abaixo não valem
+  (estão dentro do @media), então o conteúdo também fica visível.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  /* Estado revelado: anima ao voltar de `.af-rolar-oculto` para cá. */
+  .af-rolar {
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  /*
+    Estado escondido: `transition: none` de propósito. Sem isso, o momento em que
+    o JS esconde o elemento vira um fade-OUT (visível → escondido) — errado, e
+    visível se a seção estiver perto da dobra. Assim, esconder é instantâneo e só
+    o revelar anima (ao remover a classe, volta a valer o transition de cima).
+  */
+  .af-rolar-oculto {
+    opacity: 0;
+    transition: none;
+  }
+  .af-rolar-oculto.af-dir-cima { transform: translateY(24px); }
+  .af-rolar-oculto.af-dir-esquerda { transform: translateX(-30px); }
+  .af-rolar-oculto.af-dir-direita { transform: translateX(30px); }
+}

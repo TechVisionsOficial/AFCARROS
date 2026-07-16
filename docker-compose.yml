@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: afcarros-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: afcarros
+      POSTGRES_PASSWORD: afcarros
+      POSTGRES_DB: afcarros
+    ports:
+      - "5432:5432"
+    volumes:
+      - afcarros_db_data:/var/lib/postgresql/data
+
+volumes:
+  afcarros_db_data:
