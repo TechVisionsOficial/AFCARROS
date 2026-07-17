@@ -68,6 +68,7 @@ export async function atualizarVeiculo(
   const marca = String(formData.get("marca") ?? "").trim();
   const modelo = String(formData.get("modelo") ?? "").trim();
   const ano = parseNumero(formData.get("ano"));
+  const anoFabricacao = parseNumero(formData.get("anoFabricacao"));
   const km = parseNumero(formData.get("km"));
   const condicao = String(formData.get("condicao") ?? "");
   const descricao = String(formData.get("descricao") ?? "").trim();
@@ -84,8 +85,8 @@ export async function atualizarVeiculo(
   if (!marca || !modelo) {
     return { error: "Informe marca e modelo." };
   }
-  if (!ano || !km) {
-    return { error: "Informe ano e km válidos." };
+  if (!ano || !anoFabricacao || !km) {
+    return { error: "Informe ano de fabricação, ano modelo e km válidos." };
   }
   if (!CONDICOES.includes(condicao as CondicaoVeiculo)) {
     return { error: "Selecione a condição do veículo." };
@@ -128,6 +129,7 @@ export async function atualizarVeiculo(
       marca,
       modelo,
       ano,
+      anoFabricacao,
       km,
       condicao: condicao as CondicaoVeiculo,
       descricao: descricao || null,

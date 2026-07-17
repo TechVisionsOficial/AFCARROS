@@ -29,6 +29,7 @@ export default async function Home() {
     marca: v.marca,
     modelo: v.modelo,
     ano: v.ano,
+    anoFabricacao: v.anoFabricacao,
     km: v.km,
     condicao: v.condicao,
     status: v.status,

@@ -12,6 +12,7 @@ export type VeiculoPublico = {
   marca: string;
   modelo: string;
   ano: number;
+  anoFabricacao: number;
   km: number;
   condicao: string;
   status: string;
@@ -34,8 +35,13 @@ function fmtMoeda(n: number) {
   return "R$ " + n.toLocaleString("pt-BR");
 }
 
+/** Ano no padrão brasileiro: fabricação/modelo, ex.: "2015/2016". */
+function fmtAno(veiculo: VeiculoPublico) {
+  return `${veiculo.anoFabricacao}/${veiculo.ano}`;
+}
+
 function BotoesContato({ veiculo }: { veiculo: VeiculoPublico }) {
-  const mensagem = `Olá! Tenho interesse no ${veiculo.marca} ${veiculo.modelo} ${veiculo.ano} anunciado na AFCARROS.`;
+  const mensagem = `Olá! Tenho interesse no ${veiculo.marca} ${veiculo.modelo} ${fmtAno(veiculo)} anunciado na AFCARROS.`;
   return (
     <div className="flex gap-2">
       <a
@@ -117,7 +123,7 @@ function VeiculoCard({
           {veiculo.marca} {veiculo.modelo}
         </p>
         <p className="mt-0.5 text-sm text-brand-gray">
-          {veiculo.ano} · {veiculo.km.toLocaleString("pt-BR")} km · {CONDICAO_LABEL[veiculo.condicao]}
+          {fmtAno(veiculo)} · {veiculo.km.toLocaleString("pt-BR")} km · {CONDICAO_LABEL[veiculo.condicao]}
         </p>
         <p className="mt-2 text-lg font-medium text-brand-graphite">{fmtMoeda(veiculo.precoVenda)}</p>
 
@@ -225,7 +231,7 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
             {veiculo.marca} {veiculo.modelo}
           </p>
           <p className="mt-1 text-sm text-brand-gray">
-            {TIPO_LABEL[veiculo.tipo]} · {veiculo.ano} · {veiculo.km.toLocaleString("pt-BR")} km ·{" "}
+            {TIPO_LABEL[veiculo.tipo]} · {fmtAno(veiculo)} · {veiculo.km.toLocaleString("pt-BR")} km ·{" "}
             {CONDICAO_LABEL[veiculo.condicao]}
           </p>
           <p className="mt-3 text-2xl font-medium text-brand-graphite">{fmtMoeda(veiculo.precoVenda)}</p>

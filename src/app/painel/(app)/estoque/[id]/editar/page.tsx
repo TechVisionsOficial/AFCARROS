@@ -42,6 +42,7 @@ export default async function EditarVeiculoPage({
           marca: veiculo.marca,
           modelo: veiculo.modelo,
           ano: veiculo.ano,
+          anoFabricacao: veiculo.anoFabricacao,
           km: veiculo.km,
           condicao: veiculo.condicao,
           descricao: veiculo.descricao,

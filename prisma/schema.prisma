@@ -115,7 +115,8 @@ model Veiculo {
   tipo             TipoVeiculo
   marca            String
   modelo           String
-  ano              Int
+  ano              Int // ano modelo (o que aparece no anúncio, usado para ordenar)
+  anoFabricacao    Int               @map("ano_fabricacao")
   km               Int
   condicao         CondicaoVeiculo
   status           StatusVeiculo     @default(DISPONIVEL)

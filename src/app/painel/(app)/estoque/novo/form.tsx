@@ -94,7 +94,8 @@ export function NovoVeiculoForm({
           </select>
           <input name="marca" required placeholder="Marca" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
           <input name="modelo" required placeholder="Modelo" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
-          <input name="ano" type="number" required placeholder="Ano" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
+          <input name="anoFabricacao" type="number" required placeholder="Ano de fabricação" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
+          <input name="ano" type="number" required placeholder="Ano modelo" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
           <input name="km" type="number" required placeholder="Km" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
         </div>
         <textarea

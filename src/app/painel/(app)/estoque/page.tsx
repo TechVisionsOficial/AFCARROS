@@ -74,7 +74,7 @@ export default async function EstoquePage() {
                   </span>
                 </div>
                 <p className="text-xs text-brand-gray">
-                  {veiculo.ano} · {veiculo.km.toLocaleString("pt-BR")} km
+                  {veiculo.anoFabricacao}/{veiculo.ano} · {veiculo.km.toLocaleString("pt-BR")} km
                 </p>
                 <p className="mt-2 text-sm font-medium">
                   R$ {precoExibido.toLocaleString("pt-BR")}

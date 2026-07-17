@@ -40,6 +40,7 @@ type VeiculoEdicao = {
   marca: string;
   modelo: string;
   ano: number;
+  anoFabricacao: number;
   km: number;
   condicao: string;
   descricao: string | null;
@@ -142,11 +143,19 @@ export function EditarVeiculoForm({
             className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
           />
           <input
+            name="anoFabricacao"
+            type="number"
+            required
+            defaultValue={veiculo.anoFabricacao}
+            placeholder="Ano de fabricação"
+            className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
+          />
+          <input
             name="ano"
             type="number"
             required
             defaultValue={veiculo.ano}
-            placeholder="Ano"
+            placeholder="Ano modelo"
             className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
           />
           <input

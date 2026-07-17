@@ -78,7 +78,7 @@ export async function montarContexto(): Promise<string> {
       const gastos = v.gastos.reduce((g, x) => g + Number(x.valor), 0);
       const margem = Number(v.precoVenda) - Number(v.precoCompra) - gastos;
       p(
-        `- ${TIPO[v.tipo]} ${v.marca} ${v.modelo} ${v.ano} · ${v.km.toLocaleString("pt-BR")} km · ${COND[v.condicao]} · status ${v.status}` +
+        `- ${TIPO[v.tipo]} ${v.marca} ${v.modelo} ${v.anoFabricacao}/${v.ano} · ${v.km.toLocaleString("pt-BR")} km · ${COND[v.condicao]} · status ${v.status}` +
           ` | venda ${brl(Number(v.precoVenda))} · compra ${brl(Number(v.precoCompra))} · mínimo ${brl(Number(v.precoMinimo))}` +
           ` · gastos ${brl(gastos)} · margem prevista ${brl(margem)}` +
           ` · ${diasDesde(v.criadoEm)} dias em estoque` +
@@ -98,7 +98,7 @@ export async function montarContexto(): Promise<string> {
       const precoReal = Number(v.precoVendaReal ?? v.precoVenda);
       const margemReal = precoReal - Number(v.precoCompra) - gastos;
       p(
-        `- ${v.marca} ${v.modelo} ${v.ano} · vendido por ${brl(precoReal)}` +
+        `- ${v.marca} ${v.modelo} ${v.anoFabricacao}/${v.ano} · vendido por ${brl(precoReal)}` +
           (v.vendidoEm ? ` em ${v.vendidoEm.toLocaleDateString("pt-BR")}` : "") +
           ` · margem real ${brl(margemReal)}` +
           (v.comprador ? ` · comprador ${v.comprador.nome}` : ""),
