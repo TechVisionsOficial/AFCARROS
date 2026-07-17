@@ -162,9 +162,10 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
+        style={{ maxHeight: "90vh" }}
         className="flex w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white"
       >
-        <div className="relative h-64 bg-zinc-100 sm:h-72">
+        <div className="relative h-64 shrink-0 bg-zinc-100 sm:h-72">
           {fotos.length > 0 ? (
             <Image
               src={fotos[indice]}
@@ -219,7 +220,7 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
           )}
         </div>
 
-        <div className="p-6">
+        <div className="overflow-y-auto p-6">
           <p className="text-xl font-medium text-brand-graphite">
             {veiculo.marca} {veiculo.modelo}
           </p>
