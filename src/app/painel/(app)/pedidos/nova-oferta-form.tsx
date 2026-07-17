@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { criarOferta, type OfertaState } from "./actions";
 import { SeletorCliente, type ClienteOpcao } from "./seletor-cliente";
 import { CampoFotos } from "../estoque/campo-fotos";
+import { CampoMoeda } from "../campo-moeda";
 
 const initialState: OfertaState = { error: null };
 
@@ -17,6 +18,7 @@ export function NovaOfertaForm({
   const [aberto, setAberto] = useState(false);
   const [state, formAction, pending] = useActionState(criarOferta, initialState);
   const [enviandoFotos, setEnviandoFotos] = useState(false);
+  const [precoPedido, setPrecoPedido] = useState("");
   // Id gerado no cliente para as fotos subirem em ofertas/<id>/ antes de a
   // oferta existir; a action cria a oferta com este mesmo id.
   const [ofertaId] = useState(() => crypto.randomUUID());
@@ -53,11 +55,10 @@ export function NovaOfertaForm({
         <input name="modelo" required placeholder="Modelo" className="h-9 rounded-md border border-zinc-300 px-2 text-sm" />
         <input name="ano" type="number" placeholder="Ano" className="h-9 rounded-md border border-zinc-300 px-2 text-sm" />
         <input name="km" type="number" placeholder="Km" className="h-9 rounded-md border border-zinc-300 px-2 text-sm" />
-        <input
+        <CampoMoeda
           name="precoPedido"
-          type="number"
-          step="0.01"
-          placeholder="Preço pedido"
+          value={precoPedido}
+          onChange={setPrecoPedido}
           className="h-9 rounded-md border border-zinc-300 px-2 text-sm sm:col-span-2"
         />
       </div>

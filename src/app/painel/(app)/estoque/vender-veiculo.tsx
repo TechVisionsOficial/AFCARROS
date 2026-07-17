@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { marcarVendido, type MarcarVendidoState } from "./actions";
+import { CampoMoeda } from "../campo-moeda";
 import { SeletorCliente, type ClienteOpcao } from "../seletor-cliente";
 
 const initialState: MarcarVendidoState = { error: null, sucesso: false };
@@ -45,6 +46,7 @@ export function VenderVeiculoForm({
 }) {
   const [aberto, setAberto] = useState(false);
   const [state, formAction, pending] = useActionState(marcarVendido, initialState);
+  const [precoVendaReal, setPrecoVendaReal] = useState(String(Math.round(precoVenda)));
   const jaComemorou = useRef(false);
 
   useEffect(() => {
@@ -72,12 +74,11 @@ export function VenderVeiculoForm({
       <input type="hidden" name="veiculoId" value={veiculoId} />
       <div>
         <label className="text-[11px] text-brand-gray">Preço real da venda</label>
-        <input
+        <CampoMoeda
           name="precoVendaReal"
-          type="number"
-          step="0.01"
-          defaultValue={precoVenda}
           required
+          value={precoVendaReal}
+          onChange={setPrecoVendaReal}
           className="h-8 w-full rounded-md border border-zinc-300 px-2 text-xs"
         />
       </div>

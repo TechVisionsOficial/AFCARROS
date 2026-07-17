@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { criarVeiculo, type NovoVeiculoState } from "./actions";
 import { CampoFotos } from "../campo-fotos";
+import { CampoMoeda } from "../../campo-moeda";
 import { SeletorCliente, type ClienteOpcao } from "../../seletor-cliente";
 
 const ORIGENS = [
@@ -120,37 +121,31 @@ export function NovoVeiculoForm({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço de compra</label>
-            <input
+            <CampoMoeda
               name="precoCompra"
-              type="number"
-              step="0.01"
               required
               value={precoCompra}
-              onChange={(e) => setPrecoCompra(e.target.value)}
+              onChange={setPrecoCompra}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço de venda (anunciado)</label>
-            <input
+            <CampoMoeda
               name="precoVenda"
-              type="number"
-              step="0.01"
               required
               value={precoVenda}
-              onChange={(e) => setPrecoVenda(e.target.value)}
+              onChange={setPrecoVenda}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço mínimo (desconto até)</label>
-            <input
+            <CampoMoeda
               name="precoMinimo"
-              type="number"
-              step="0.01"
               required
               value={precoMinimo}
-              onChange={(e) => setPrecoMinimo(e.target.value)}
+              onChange={setPrecoMinimo}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>

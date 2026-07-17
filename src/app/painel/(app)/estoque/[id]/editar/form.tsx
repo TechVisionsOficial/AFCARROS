@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useActionState, useState } from "react";
 import { atualizarVeiculo, removerFoto, removerGasto, type EditarVeiculoState } from "./actions";
 import { CampoFotos } from "../../campo-fotos";
+import { CampoMoeda } from "../../../campo-moeda";
 import { SeletorCliente, type ClienteOpcao } from "../../../seletor-cliente";
 
 const ORIGENS = [
@@ -73,9 +74,11 @@ export function EditarVeiculoForm({
   const [enviandoFotos, setEnviandoFotos] = useState(false);
 
   const [gastosNovos, setGastosNovos] = useState<{ id: number; categoria: string; valor: string }[]>([]);
-  const [precoCompra, setPrecoCompra] = useState(String(veiculo.precoCompra));
-  const [precoVenda, setPrecoVenda] = useState(String(veiculo.precoVenda));
-  const [precoMinimo, setPrecoMinimo] = useState(String(veiculo.precoMinimo));
+  // Reais inteiros (só dígitos) para o CampoMoeda. Arredonda dados antigos que
+  // por acaso tenham centavos, mantendo tudo consistente com o campo novo.
+  const [precoCompra, setPrecoCompra] = useState(String(Math.round(veiculo.precoCompra)));
+  const [precoVenda, setPrecoVenda] = useState(String(Math.round(veiculo.precoVenda)));
+  const [precoMinimo, setPrecoMinimo] = useState(String(Math.round(veiculo.precoMinimo)));
   const [nextId, setNextId] = useState(0);
 
   function addGasto() {
@@ -202,37 +205,31 @@ export function EditarVeiculoForm({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço de compra</label>
-            <input
+            <CampoMoeda
               name="precoCompra"
-              type="number"
-              step="0.01"
               required
               value={precoCompra}
-              onChange={(e) => setPrecoCompra(e.target.value)}
+              onChange={setPrecoCompra}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço de venda (anunciado)</label>
-            <input
+            <CampoMoeda
               name="precoVenda"
-              type="number"
-              step="0.01"
               required
               value={precoVenda}
-              onChange={(e) => setPrecoVenda(e.target.value)}
+              onChange={setPrecoVenda}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-brand-gray">Preço mínimo (desconto até)</label>
-            <input
+            <CampoMoeda
               name="precoMinimo"
-              type="number"
-              step="0.01"
               required
               value={precoMinimo}
-              onChange={(e) => setPrecoMinimo(e.target.value)}
+              onChange={setPrecoMinimo}
               className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
             />
           </div>
