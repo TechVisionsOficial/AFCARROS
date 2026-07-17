@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import { fotosViaBlobDireto } from "@/lib/storage";
 import { NovoPedidoForm } from "./novo-pedido-form";
 import { NovaOfertaForm } from "./nova-oferta-form";
 import { ControlesPedido, ControlesOferta } from "./controles";
@@ -77,7 +78,7 @@ export default async function PedidosPage() {
             <h1 className="text-2xl font-medium text-brand-graphite">Ofertas</h1>
             <p className="text-sm text-brand-gray">Veículos que ofereceram para a loja.</p>
           </div>
-          <NovaOfertaForm clientes={clientes} />
+          <NovaOfertaForm clientes={clientes} fotosDireto={fotosViaBlobDireto()} />
         </div>
 
         {ofertas.length === 0 ? (

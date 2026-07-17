@@ -37,6 +37,35 @@ function token(visibilidade: Visibilidade): string | undefined {
   return visibilidade === "publico" ? tokenFotos() : tokenDocumentos();
 }
 
+/**
+ * As fotos sobem direto do navegador para o Blob quando há token (produção).
+ * O envio pela server action tem limite de tamanho (1MB por padrão), então uma
+ * só foto de celular já estoura. O upload direto não passa por esse limite.
+ * Sem token (local, sem Blob), voltamos a enviar os arquivos pela action e a
+ * gravar em disco — por isso o formulário precisa saber em qual modo está.
+ */
+export function fotosViaBlobDireto(): boolean {
+  return Boolean(tokenFotos());
+}
+
+/**
+ * Confirma que uma URL veio do nosso Blob público. O upload direto acontece no
+ * navegador e devolve a URL; o formulário a envia de volta. Sem esta checagem,
+ * uma submissão forjada poderia gravar qualquer URL no banco (e o site a
+ * renderizaria). Aceitamos apenas o domínio do Vercel Blob, sobre HTTPS.
+ */
+export function ehUrlBlobPublico(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return (
+      u.protocol === "https:" &&
+      u.hostname.endsWith(".public.blob.vercel-storage.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Usa o Blob? Em produção é obrigatório — sem token, erro explícito. */
 function usarBlob(visibilidade: Visibilidade): boolean {
   const t = token(visibilidade);

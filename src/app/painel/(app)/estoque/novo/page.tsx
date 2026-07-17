@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { fotosViaBlobDireto } from "@/lib/storage";
 import { NovoVeiculoForm } from "./form";
 
 export default async function NovoVeiculoPage() {
@@ -10,7 +11,7 @@ export default async function NovoVeiculoPage() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-medium text-brand-graphite">Novo anúncio</h1>
-      <NovoVeiculoForm clientes={clientes} />
+      <NovoVeiculoForm clientes={clientes} fotosDireto={fotosViaBlobDireto()} />
     </div>
   );
 }

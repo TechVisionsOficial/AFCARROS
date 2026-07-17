@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { fotosViaBlobDireto } from "@/lib/storage";
 import { EditarVeiculoForm } from "./form";
 import { DocumentosVeiculo } from "./documentos";
 
@@ -60,6 +61,7 @@ export default async function EditarVeiculoPage({
           categoria: g.categoria,
           valor: Number(g.valor),
         }))}
+        fotosDireto={fotosViaBlobDireto()}
       />
 
       <DocumentosVeiculo

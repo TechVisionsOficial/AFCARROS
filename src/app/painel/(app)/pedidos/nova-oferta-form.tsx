@@ -7,9 +7,19 @@ import { CampoFotos } from "../estoque/campo-fotos";
 
 const initialState: OfertaState = { error: null };
 
-export function NovaOfertaForm({ clientes }: { clientes: ClienteOpcao[] }) {
+export function NovaOfertaForm({
+  clientes,
+  fotosDireto,
+}: {
+  clientes: ClienteOpcao[];
+  fotosDireto: boolean;
+}) {
   const [aberto, setAberto] = useState(false);
   const [state, formAction, pending] = useActionState(criarOferta, initialState);
+  const [enviandoFotos, setEnviandoFotos] = useState(false);
+  // Id gerado no cliente para as fotos subirem em ofertas/<id>/ antes de a
+  // oferta existir; a action cria a oferta com este mesmo id.
+  const [ofertaId] = useState(() => crypto.randomUUID());
 
   if (!aberto) {
     return (
@@ -31,6 +41,7 @@ export function NovaOfertaForm({ clientes }: { clientes: ClienteOpcao[] }) {
       }}
       className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4"
     >
+      <input type="hidden" name="ofertaId" value={ofertaId} />
       <SeletorCliente clientes={clientes} />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -57,17 +68,22 @@ export function NovaOfertaForm({ clientes }: { clientes: ClienteOpcao[] }) {
         className="h-9 rounded-md border border-zinc-300 px-2 text-sm"
       />
 
-      <CampoFotos label="Adicionar fotos do veículo ofertado" />
+      <CampoFotos
+        label="Adicionar fotos do veículo ofertado"
+        pasta={`ofertas/${ofertaId}`}
+        direto={fotosDireto}
+        onEnviandoChange={setEnviandoFotos}
+      />
 
       {state.error && <p className="text-xs text-red-600">{state.error}</p>}
 
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || enviandoFotos}
           className="h-9 rounded-md bg-brand-red px-3 text-sm font-medium text-white disabled:opacity-60"
         >
-          {pending ? "Salvando..." : "Salvar oferta"}
+          {enviandoFotos ? "Enviando fotos..." : pending ? "Salvando..." : "Salvar oferta"}
         </button>
         <button
           type="button"

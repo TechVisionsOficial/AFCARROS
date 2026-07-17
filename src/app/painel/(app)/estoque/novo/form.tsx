@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { criarVeiculo, type NovoVeiculoState } from "./actions";
 import { CampoFotos } from "../campo-fotos";
 import { SeletorCliente, type ClienteOpcao } from "../../seletor-cliente";
@@ -32,13 +32,27 @@ const CATEGORIA_VALUE: Record<string, string> = {
 
 const initialState: NovoVeiculoState = { error: null };
 
-export function NovoVeiculoForm({ clientes }: { clientes: ClienteOpcao[] }) {
+export function NovoVeiculoForm({
+  clientes,
+  fotosDireto,
+}: {
+  clientes: ClienteOpcao[];
+  fotosDireto: boolean;
+}) {
   const [state, formAction, pending] = useActionState(criarVeiculo, initialState);
   const [gastos, setGastos] = useState<{ id: number; categoria: string; valor: string }[]>([]);
   const [precoCompra, setPrecoCompra] = useState("");
   const [precoVenda, setPrecoVenda] = useState("");
   const [precoMinimo, setPrecoMinimo] = useState("");
   const [nextId, setNextId] = useState(0);
+  const [enviandoFotos, setEnviandoFotos] = useState(false);
+  // Id gerado no cliente para que as fotos subam em veiculos/<id>/ ANTES de o
+  // veículo existir. A action cria o veículo com este mesmo id (ver actions.ts).
+  // Gerado após montar (não no SSR) para não divergir na hidratação.
+  const [veiculoId, setVeiculoId] = useState("");
+  useEffect(() => {
+    setVeiculoId(crypto.randomUUID());
+  }, []);
 
   function addGasto() {
     setGastos((g) => [...g, { id: nextId, categoria: "Manutenção", valor: "" }]);
@@ -63,6 +77,7 @@ export function NovoVeiculoForm({ clientes }: { clientes: ClienteOpcao[] }) {
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+      <input type="hidden" name="veiculoId" value={veiculoId} />
       <div>
         <p className="mb-3 text-sm font-medium text-brand-gray">
           Dados do veículo — aparece no site
@@ -88,7 +103,12 @@ export function NovoVeiculoForm({ clientes }: { clientes: ClienteOpcao[] }) {
           className="mt-3 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
         />
         <div className="mt-4">
-          <CampoFotos label="Adicionar fotos" />
+          <CampoFotos
+            label="Adicionar fotos"
+            pasta={`veiculos/${veiculoId}`}
+            direto={fotosDireto}
+            onEnviandoChange={setEnviandoFotos}
+          />
         </div>
       </div>
 
@@ -231,10 +251,10 @@ export function NovoVeiculoForm({ clientes }: { clientes: ClienteOpcao[] }) {
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || enviandoFotos}
         className="h-11 rounded-md bg-brand-red font-medium text-white disabled:opacity-60"
       >
-        {pending ? "Salvando..." : "Salvar anúncio"}
+        {enviandoFotos ? "Enviando fotos..." : pending ? "Salvando..." : "Salvar anúncio"}
       </button>
     </form>
   );

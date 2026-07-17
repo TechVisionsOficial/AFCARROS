@@ -60,14 +60,17 @@ export function EditarVeiculoForm({
   clientes,
   fotos,
   gastos: gastosExistentes,
+  fotosDireto,
 }: {
   veiculo: VeiculoEdicao;
   clientes: ClienteOpcao[];
   fotos: FotoExistente[];
   gastos: GastoExistente[];
+  fotosDireto: boolean;
 }) {
   const acaoComId = atualizarVeiculo.bind(null, veiculo.id);
   const [state, formAction, pending] = useActionState(acaoComId, initialState);
+  const [enviandoFotos, setEnviandoFotos] = useState(false);
 
   const [gastosNovos, setGastosNovos] = useState<{ id: number; categoria: string; valor: string }[]>([]);
   const [precoCompra, setPrecoCompra] = useState(String(veiculo.precoCompra));
@@ -184,7 +187,12 @@ export function EditarVeiculoForm({
         </div>
 
         <div className="mt-4">
-          <CampoFotos label="Adicionar novas fotos" />
+          <CampoFotos
+            label="Adicionar novas fotos"
+            pasta={`veiculos/${veiculo.id}`}
+            direto={fotosDireto}
+            onEnviandoChange={setEnviandoFotos}
+          />
         </div>
       </div>
 
@@ -354,10 +362,10 @@ export function EditarVeiculoForm({
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || enviandoFotos}
         className="h-11 rounded-md bg-brand-red font-medium text-white disabled:opacity-60"
       >
-        {pending ? "Salvando..." : "Salvar alterações"}
+        {enviandoFotos ? "Enviando fotos..." : pending ? "Salvando..." : "Salvar alterações"}
       </button>
     </form>
   );

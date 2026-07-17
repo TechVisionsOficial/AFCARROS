@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { resolverCliente } from "@/lib/resolver-cliente";
-import { apagarArquivo, salvarArquivo } from "@/lib/storage";
+import { apagarArquivo, salvarArquivo, ehUrlBlobPublico } from "@/lib/storage";
 import { validarImagem, validarDocumento } from "@/lib/upload";
 import type {
   CategoriaDocumento,
@@ -43,6 +43,18 @@ function parseNumero(valor: FormDataEntryValue | null): number | null {
   if (!valor) return null;
   const n = Number(valor);
   return Number.isFinite(n) ? n : null;
+}
+
+/** Lê o campo escondido `fotosUrls` (JSON de URLs) enviado no modo direto. */
+function lerFotosUrls(formData: FormData): string[] {
+  const raw = String(formData.get("fotosUrls") ?? "");
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function atualizarVeiculo(
@@ -96,6 +108,9 @@ export async function atualizarVeiculo(
     novosGastos.push({ categoria: categoria as CategoriaGasto, valor, descricao: null });
   }
 
+  // Modo direto (produção): URLs já enviadas ao Blob. Modo arquivo (local): files.
+  const fotosUrls = lerFotosUrls(formData);
+
   const fotos = formData.getAll("fotos").filter((f): f is File => f instanceof File && f.size > 0);
   const fotosValidadas: { foto: File; ext: string }[] = [];
   for (const foto of fotos) {
@@ -128,7 +143,20 @@ export async function atualizarVeiculo(
     },
   });
 
-  if (fotosValidadas.length > 0) {
+  if (fotosUrls.length > 0) {
+    // Modo direto: valida cada URL (nosso Blob + pasta deste veículo) e anexa
+    // depois das fotos que já existem.
+    const validas = fotosUrls.filter(
+      (u) => ehUrlBlobPublico(u) && u.includes(`/veiculos/${veiculoId}/`),
+    );
+    if (validas.length > 0) {
+      const maiorOrdem = await prisma.veiculoFoto.count({ where: { veiculoId } });
+      await prisma.veiculoFoto.createMany({
+        data: validas.map((url, i) => ({ url, ordem: maiorOrdem + i, veiculoId })),
+      });
+    }
+  } else if (fotosValidadas.length > 0) {
+    // Modo arquivo (local): grava cada foto enviada pela própria ação.
     const maiorOrdem = await prisma.veiculoFoto.count({ where: { veiculoId } });
 
     const fotosData = [];

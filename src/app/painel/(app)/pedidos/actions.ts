@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import { apagarPrefixo, salvarArquivo } from "@/lib/storage";
+import { apagarPrefixo, salvarArquivo, ehUrlBlobPublico } from "@/lib/storage";
 import { validarImagem } from "@/lib/upload";
 import type {
   StatusOferta,
@@ -15,6 +15,18 @@ import type {
 const TIPOS: TipoVeiculo[] = ["CARRO", "MOTO"];
 const STATUS_PEDIDO: StatusPedido[] = ["ABERTO", "ATENDIDO", "CANCELADO"];
 const STATUS_OFERTA: StatusOferta[] = ["ABERTA", "RECUSADA", "COMPRADA"];
+
+/** Lê o campo escondido `fotosUrls` (JSON de URLs) enviado no modo direto. */
+function lerFotosUrls(formData: FormData): string[] {
+  const raw = String(formData.get("fotosUrls") ?? "");
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 function parseNumero(valor: FormDataEntryValue | null): number | null {
   if (!valor || String(valor).trim() === "") return null;
@@ -102,6 +114,14 @@ export async function criarOferta(
     return { error: "Selecione um cliente ou informe um novo." };
   }
 
+  // Id gerado no cliente: no modo direto as fotos já subiram em ofertas/<id>/,
+  // então a oferta precisa ser criada com esse mesmo id.
+  const ofertaIdRaw = String(formData.get("ofertaId") ?? "").trim();
+  const ofertaId = /^[a-zA-Z0-9-]+$/.test(ofertaIdRaw) ? ofertaIdRaw : randomUUID();
+
+  // Modo direto (produção): URLs já enviadas ao Blob. Modo arquivo (local): files.
+  const fotosUrls = lerFotosUrls(formData);
+
   // Valida as fotos ANTES de criar a oferta, para não deixar registro órfão.
   const fotos = formData.getAll("fotos").filter((f): f is File => f instanceof File && f.size > 0);
   const fotosValidadas: { foto: File; ext: string }[] = [];
@@ -113,6 +133,7 @@ export async function criarOferta(
 
   const oferta = await prisma.oferta.create({
     data: {
+      id: ofertaId,
       clienteId,
       tipo: tipo as TipoVeiculo,
       marca,
@@ -124,7 +145,16 @@ export async function criarOferta(
     },
   });
 
-  if (fotosValidadas.length > 0) {
+  if (fotosUrls.length > 0) {
+    const validas = fotosUrls.filter(
+      (u) => ehUrlBlobPublico(u) && u.includes(`/ofertas/${oferta.id}/`),
+    );
+    if (validas.length > 0) {
+      await prisma.ofertaFoto.createMany({
+        data: validas.map((url, i) => ({ url, ordem: i, ofertaId: oferta.id })),
+      });
+    }
+  } else if (fotosValidadas.length > 0) {
     const fotosData = [];
     for (let i = 0; i < fotosValidadas.length; i++) {
       const { foto, ext } = fotosValidadas[i];

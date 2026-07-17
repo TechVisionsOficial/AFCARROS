@@ -32,6 +32,15 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // As FOTOS sobem direto do navegador para o Blob (sem passar por aqui). Este
+  // limite vale para o que ainda passa pela server action: os DOCUMENTOS (laudos
+  // em PDF) e o upload local em disco. O padrão do Next é 1MB — pequeno demais
+  // para um PDF. Na Vercel o teto de plataforma é 4.5MB, então subimos até lá.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
+  },
   images: {
     remotePatterns: [
       // Fotos dos veículos ficam no Vercel Blob em produção. Sem isso o

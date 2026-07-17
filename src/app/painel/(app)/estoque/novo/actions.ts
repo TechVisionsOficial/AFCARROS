@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { resolverCliente } from "@/lib/resolver-cliente";
-import { salvarArquivo } from "@/lib/storage";
+import { salvarArquivo, ehUrlBlobPublico } from "@/lib/storage";
 import { validarImagem } from "@/lib/upload";
 import type {
   CategoriaGasto,
@@ -34,6 +34,18 @@ function parseNumero(valor: FormDataEntryValue | null): number | null {
   if (!valor) return null;
   const n = Number(valor);
   return Number.isFinite(n) ? n : null;
+}
+
+/** Lê o campo escondido `fotosUrls` (JSON de URLs) enviado no modo direto. */
+function lerFotosUrls(formData: FormData): string[] {
+  const raw = String(formData.get("fotosUrls") ?? "");
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function criarVeiculo(
@@ -91,6 +103,16 @@ export async function criarVeiculo(
     });
   }
 
+  // Id gerado no cliente: as fotos (modo direto) já subiram em veiculos/<id>/,
+  // então o veículo precisa ser criado com esse mesmo id. Só aceitamos o
+  // formato de ID do banco para nunca virar caminho estranho.
+  const veiculoIdRaw = String(formData.get("veiculoId") ?? "").trim();
+  const veiculoId = /^[a-zA-Z0-9-]+$/.test(veiculoIdRaw) ? veiculoIdRaw : randomUUID();
+
+  // Modo direto (produção): as fotos já foram enviadas ao Blob pelo navegador e
+  // recebemos as URLs. Modo arquivo (local): os arquivos vêm na própria ação.
+  const fotosUrls = lerFotosUrls(formData);
+
   const fotos = formData.getAll("fotos").filter((f): f is File => f instanceof File && f.size > 0);
   const fotosValidadas: { foto: File; ext: string }[] = [];
   for (const foto of fotos) {
@@ -103,6 +125,7 @@ export async function criarVeiculo(
 
   const veiculo = await prisma.veiculo.create({
     data: {
+      id: veiculoId,
       tipo: tipo as TipoVeiculo,
       marca,
       modelo,
@@ -120,7 +143,19 @@ export async function criarVeiculo(
     },
   });
 
-  if (fotosValidadas.length > 0) {
+  if (fotosUrls.length > 0) {
+    // Modo direto: valida que cada URL é do nosso Blob e desta pasta de veículo,
+    // para uma submissão forjada não gravar URLs arbitrárias no banco.
+    const validas = fotosUrls.filter(
+      (u) => ehUrlBlobPublico(u) && u.includes(`/veiculos/${veiculo.id}/`),
+    );
+    if (validas.length > 0) {
+      await prisma.veiculoFoto.createMany({
+        data: validas.map((url, i) => ({ url, ordem: i, veiculoId: veiculo.id })),
+      });
+    }
+  } else if (fotosValidadas.length > 0) {
+    // Modo arquivo (local): grava cada foto enviada pela própria ação.
     const fotosData = [];
     for (let i = 0; i < fotosValidadas.length; i++) {
       const { foto, ext } = fotosValidadas[i];
