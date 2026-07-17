@@ -299,33 +299,43 @@ O projeto foi preparado para a Vercel. Duas coisas não podiam ir do jeito que e
 2. **Arquivos** — fotos e documentos gravavam em disco. **O disco da Vercel é descartável: some a
    cada deploy.** Agora tudo vai para o **Vercel Blob**, via [storage.ts](src/lib/storage.ts).
 
-### Como o armazenamento funciona
+### Como o armazenamento funciona — DOIS stores
+
+O acesso do Vercel Blob é definido **por store** e **não pode ser alterado depois de criado**. Como
+fotos e documentos têm necessidades opostas, usamos dois:
+
+| | Store | Guardado no banco | Por quê |
+|---|---|---|---|
+| **Fotos** | `afcarros-fotos` — **público** | a URL | O visitante precisa ver no site (`<img>` + CDN) |
+| **Documentos** | `afcarros-documentos` — **privado** | o caminho (nunca uma URL) | Laudos: leitura exige token, entregue só pelo servidor |
 
 [storage.ts](src/lib/storage.ts) escolhe o modo sozinho:
-- **Com `BLOB_READ_WRITE_TOKEN`** (produção) → Vercel Blob.
-- **Sem token** (seu Mac) → disco, como sempre. Mantém o dev local funcionando sem token.
+- **Com os tokens** (produção) → Vercel Blob.
+- **Sem tokens** (seu Mac) → disco, como sempre. Mantém o dev local funcionando.
 - **Em produção sem token → lança erro de propósito.** Cair para o disco "funcionaria" e depois
   apagaria tudo no próximo deploy — um bug silencioso e destrutivo. Melhor quebrar na hora.
 
 Nenhum outro arquivo toca o disco: todo acesso está isolado nesse módulo.
 
-**Privacidade dos documentos:** o Vercel Blob só oferece URL pública (porém impossível de
-adivinhar). Por isso a URL do documento **nunca vai para o navegador** — fica no banco e o servidor
-a lê na rota autenticada [documentos/[id]](src/app/painel/documentos/[id]/route.ts). Só quem está
-logado baixa. `lerArquivo()` também recusa URLs fora do nosso Blob (proteção contra SSRF).
-⚠️ É um degrau abaixo da pasta privada local: se a URL vazar, o arquivo é acessível. Para pasta
-100% privada com links que expiram, seria preciso Cloudflare R2 / S3.
+**Privacidade dos documentos:** o store privado exige token para ler — **não existe URL pública**.
+Por isso guardamos o *caminho* (não uma URL) e a rota autenticada
+[documentos/[id]](src/app/painel/documentos/[id]/route.ts) busca com `get({access:"private"})` e
+entrega só para quem está logado. A verificação de login fica **na própria rota**, ao lado do
+`get()` — conforme recomenda a Vercel (não confiar só no middleware). `lerArquivo()` recusa
+qualquer referência que seja URL (protege contra SSRF).
 
 ### Passo a passo
 
 1. **Banco (Neon)** — criar projeto em neon.tech e copiar a connection string (a **pooled**, que
    tem `-pooler` no host — importante para serverless).
-2. **Blob** — no projeto da Vercel: aba *Storage* → criar um **Blob Store**. A Vercel injeta a
-   `BLOB_READ_WRITE_TOKEN` automaticamente.
+2. **Blob** — na aba *Storage* da Vercel, criar **dois** stores (região São Paulo `gru1`):
+   - `afcarros-fotos` → **Public**
+   - `afcarros-documentos` → **Private**
 3. **Variáveis de ambiente na Vercel:**
    - `DATABASE_URL` — a URL do Neon
    - `AUTH_SECRET` — **gerar uma nova** com `openssl rand -hex 32` (não reusar a local)
-   - `BLOB_READ_WRITE_TOKEN` — a Vercel injeta sozinha ao criar o Blob Store
+   - `BLOB_READ_WRITE_TOKEN` — token do store **público** (fotos)
+   - `BLOB_DOCUMENTOS_READ_WRITE_TOKEN` — token do store **privado** (documentos)
    - (opcional) `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` para ligar o AFCARROS AI
 4. **Build** — o `vercel-build` já roda `prisma generate && prisma migrate deploy && next build`.
    O `prisma generate` é **obrigatório**: o client é gerado em `/src/generated/prisma`, que está no

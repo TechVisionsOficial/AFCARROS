@@ -1,69 +1,69 @@
 import "server-only";
 import { mkdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { del, list, put } from "@vercel/blob";
+import { del, get, list, put } from "@vercel/blob";
 
 /**
  * Armazenamento de arquivos (fotos e documentos).
  *
- * Dois modos, escolhidos automaticamente:
- * - PRODUÇÃO (Vercel): Vercel Blob. O disco da Vercel é descartável — arquivos
- *   gravados nele somem a cada deploy. Por isso tudo vai para o Blob.
- * - LOCAL (sem BLOB_READ_WRITE_TOKEN): disco, como sempre foi. Mantém o
- *   desenvolvimento funcionando sem depender de internet/token.
+ * Em produção usamos DOIS stores do Vercel Blob, porque os dois tipos de arquivo
+ * têm necessidades opostas (e o acesso é definido por store, sem volta):
  *
- * ⚠️ Em produção sem token nós FALHAMOS ALTO em vez de cair para o disco.
- * Cair para o disco em produção "funcionaria" e depois apagaria os arquivos no
- * próximo deploy — um bug silencioso e destrutivo. Melhor quebrar na hora.
+ * - FOTOS  -> store PÚBLICO. Qualquer visitante precisa ver no site; a URL vai
+ *             direto no <img> e é servida pelo CDN. Guardamos a URL no banco.
+ * - DOCS   -> store PRIVADO. Leitura exige token; ninguém baixa por URL. Só a
+ *             rota autenticada /painel/documentos/[id] entrega o arquivo.
+ *             Guardamos o CAMINHO (pathname) no banco, não uma URL.
  *
- * Privacidade dos documentos: o Blob só oferece URL pública (porém impossível
- * de adivinhar). Por isso a URL do documento NUNCA vai para o navegador — ela
- * fica no banco e é lida pelo servidor na rota autenticada
- * /painel/documentos/[id]. Só quem está logado recebe o arquivo.
+ * LOCAL (sem tokens): grava em disco, como sempre. Mantém o dev funcionando.
+ *
+ * ⚠️ Em produção sem token nós FALHAMOS ALTO em vez de cair para o disco. Cair
+ * para o disco "funcionaria" e depois apagaria os arquivos no próximo deploy —
+ * um bug silencioso e destrutivo. Melhor quebrar na hora.
  */
 
-const BLOB_HOST_SUFIXO = ".public.blob.vercel-storage.com";
+export type Visibilidade = "publico" | "privado";
 
-function tokenBlob(): string | undefined {
+/** Store público (fotos). A Vercel cria esta variável ao conectar o store. */
+function tokenFotos(): string | undefined {
   return process.env.BLOB_READ_WRITE_TOKEN;
 }
+/** Store privado (documentos). Nome definido por nós ao conectar o 2º store. */
+function tokenDocumentos(): string | undefined {
+  return process.env.BLOB_DOCUMENTOS_READ_WRITE_TOKEN;
+}
 
-function usarBlob(): boolean {
-  const token = tokenBlob();
-  if (!token && process.env.NODE_ENV === "production") {
+function token(visibilidade: Visibilidade): string | undefined {
+  return visibilidade === "publico" ? tokenFotos() : tokenDocumentos();
+}
+
+/** Usa o Blob? Em produção é obrigatório — sem token, erro explícito. */
+function usarBlob(visibilidade: Visibilidade): boolean {
+  const t = token(visibilidade);
+  if (!t && process.env.NODE_ENV === "production") {
+    const nome =
+      visibilidade === "publico"
+        ? "BLOB_READ_WRITE_TOKEN (store público das fotos)"
+        : "BLOB_DOCUMENTOS_READ_WRITE_TOKEN (store privado dos documentos)";
     throw new Error(
-      "BLOB_READ_WRITE_TOKEN não configurado. Em produção os arquivos precisam ir " +
-        "para o Vercel Blob — o disco da Vercel é apagado a cada deploy.",
+      `${nome} não configurado. Em produção os arquivos precisam ir para o Vercel ` +
+        "Blob — o disco da Vercel é apagado a cada deploy.",
     );
   }
-  return Boolean(token);
+  return Boolean(t);
 }
 
-function ehUrlBlob(valor: string): boolean {
-  if (!valor.startsWith("http")) return false;
-  try {
-    return new URL(valor).hostname.endsWith(BLOB_HOST_SUFIXO);
-  } catch {
-    return false;
-  }
-}
-
-/** Base no disco para o modo local. `publico` é servido como arquivo estático. */
 function baseLocal(visibilidade: Visibilidade): string {
   return visibilidade === "publico"
     ? path.join(process.cwd(), "public", "uploads")
     : path.join(process.cwd(), "private-uploads");
 }
 
-export type Visibilidade = "publico" | "privado";
-
 /**
  * Salva um arquivo e devolve a referência a guardar no banco.
- * - Blob: a URL completa (https://...)
- * - Local público: "/uploads/<chave>" (servido estaticamente)
- * - Local privado: "<chave>" (relativo a private-uploads)
- *
- * `chave` deve ser um caminho relativo seguro, ex.: "veiculos/<id>/<uuid>.jpg".
+ * - Foto (público): URL completa (Blob) ou "/uploads/<chave>" (local)
+ * - Documento (privado): o caminho "<chave>" nos dois modos — nunca uma URL
+ *   pública, justamente para não existir link que vaze.
  */
 export async function salvarArquivo({
   chave,
@@ -76,16 +76,24 @@ export async function salvarArquivo({
   contentType: string;
   visibilidade: Visibilidade;
 }): Promise<string> {
-  if (usarBlob()) {
-    const { url } = await put(chave, buffer, {
-      access: "public",
+  if (usarBlob(visibilidade)) {
+    if (visibilidade === "publico") {
+      const { url } = await put(chave, buffer, {
+        access: "public",
+        contentType,
+        token: tokenFotos(),
+        addRandomSuffix: false, // a chave já tem uuid; mantém o prefixo previsível
+      });
+      return url;
+    }
+    await put(chave, buffer, {
+      access: "private",
       contentType,
-      token: tokenBlob(),
-      // a chave já é única (uuid) — não deixar o Blob acrescentar sufixo,
-      // senão não conseguimos apagar por prefixo depois.
+      token: tokenDocumentos(),
       addRandomSuffix: false,
     });
-    return url;
+    // guardamos o caminho: é o que get() usa para ler
+    return chave;
   }
 
   const destino = path.join(baseLocal(visibilidade), chave);
@@ -94,15 +102,26 @@ export async function salvarArquivo({
   return visibilidade === "publico" ? `/uploads/${chave}` : chave;
 }
 
+/** Uma referência que começa com http só existe no modo público (foto). */
+function ehUrl(referencia: string): boolean {
+  return referencia.startsWith("http://") || referencia.startsWith("https://");
+}
+
 /** Apaga um arquivo pela referência guardada no banco. Nunca lança. */
 export async function apagarArquivo(referencia: string): Promise<void> {
   try {
-    if (ehUrlBlob(referencia)) {
-      await del(referencia, { token: tokenBlob() });
+    // Foto no Blob (URL) ou foto local ("/uploads/..."): visibilidade pública.
+    if (ehUrl(referencia)) {
+      await del(referencia, { token: tokenFotos() });
       return;
     }
     if (referencia.startsWith("/uploads/")) {
       await unlink(path.join(process.cwd(), "public", referencia.replace(/^\//, "")));
+      return;
+    }
+    // Sobrou o documento (caminho relativo).
+    if (usarBlob("privado")) {
+      await del(referencia, { token: tokenDocumentos() });
       return;
     }
     await unlink(path.join(process.cwd(), "private-uploads", referencia));
@@ -113,41 +132,50 @@ export async function apagarArquivo(referencia: string): Promise<void> {
 
 /** Apaga tudo sob um prefixo, ex.: "veiculos/<id>/". Nunca lança. */
 export async function apagarPrefixo(prefixo: string): Promise<void> {
-  try {
-    if (usarBlob()) {
-      const { blobs } = await list({ prefix: prefixo, token: tokenBlob() });
-      if (blobs.length > 0) {
-        await del(
-          blobs.map((b) => b.url),
-          { token: tokenBlob() },
-        );
+  // o prefixo pode existir nos dois stores (fotos e documentos)
+  for (const vis of ["publico", "privado"] as const) {
+    try {
+      if (usarBlob(vis)) {
+        const t = token(vis);
+        const { blobs } = await list({ prefix: prefixo, token: t });
+        if (blobs.length > 0) {
+          await del(
+            blobs.map((b) => b.url),
+            { token: t },
+          );
+        }
+      } else {
+        await rm(path.join(baseLocal(vis), prefixo), { recursive: true, force: true });
       }
-      return;
+    } catch {
+      // nada a apagar — tudo bem
     }
-    // local: o mesmo prefixo existe nas duas bases (fotos públicas / docs privados)
-    await rm(path.join(baseLocal("publico"), prefixo), { recursive: true, force: true });
-    await rm(path.join(baseLocal("privado"), prefixo), { recursive: true, force: true });
-  } catch {
-    // nada a apagar — tudo bem
   }
 }
 
 /**
- * Lê um arquivo privado (documentos) no servidor, para a rota autenticada.
- * Devolve null se não existir.
+ * Lê um documento privado no servidor, para a rota autenticada.
+ * Devolve null se não existir ou se a referência não for válida.
  */
 export async function lerArquivo(
   referencia: string,
 ): Promise<{ buffer: Buffer; contentType: string | null } | null> {
-  if (referencia.startsWith("http")) {
-    // Só buscamos URLs do nosso próprio Blob. Sem essa checagem, um valor
-    // adulterado no banco viraria SSRF (o servidor buscaria qualquer endereço).
-    if (!ehUrlBlob(referencia)) return null;
-    const resp = await fetch(referencia);
-    if (!resp.ok) return null;
+  // Documento nunca deveria ser uma URL. Se for, recusamos: além de errado,
+  // buscar uma URL arbitrária vinda do banco seria um SSRF.
+  if (ehUrl(referencia)) return null;
+
+  if (usarBlob("privado")) {
+    const r = await get(referencia, {
+      access: "private",
+      token: tokenDocumentos(),
+    });
+    if (!r || r.statusCode !== 200 || !r.stream) return null;
+    const chunks: Uint8Array[] = [];
+    // @ts-expect-error - stream é um ReadableStream (web); iterável no Node 18+
+    for await (const c of r.stream) chunks.push(c);
     return {
-      buffer: Buffer.from(await resp.arrayBuffer()),
-      contentType: resp.headers.get("content-type"),
+      buffer: Buffer.concat(chunks),
+      contentType: r.blob?.contentType ?? null,
     };
   }
 
