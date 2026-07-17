@@ -6,6 +6,16 @@ import { EstoquePublico, type VeiculoPublico } from "./estoque-publico";
 import { Localizacao } from "./localizacao";
 import { Rodape } from "./rodape";
 
+/**
+ * A vitrine é gerada estaticamente (rápida) e atualizada na hora que o estoque
+ * muda — as actions do painel chamam `revalidatePath("/")`.
+ *
+ * Este `revalidate` é a rede de segurança: se aquele aviso falhar, a página se
+ * atualiza sozinha em no máximo 5 minutos. Sem ele, uma falha no revalidate
+ * congelaria a vitrine para sempre (carro vendido continuaria anunciado).
+ */
+export const revalidate = 300;
+
 export default async function Home() {
   const veiculosDb = await prisma.veiculo.findMany({
     where: { status: { in: ["DISPONIVEL", "RESERVADO"] } },
