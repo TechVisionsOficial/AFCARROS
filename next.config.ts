@@ -12,7 +12,10 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // O upload direto das fotos (navegador -> Vercel Blob) faz PUT para a API de
+  // upload em vercel.com/api/blob. Sem liberar este host, o CSP bloqueia a
+  // conexão e o envio fica travado em "enviando..." para sempre.
+  "connect-src 'self' https://vercel.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
