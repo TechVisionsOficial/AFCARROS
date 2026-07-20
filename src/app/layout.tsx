@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Saira_Condensed, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -34,7 +35,10 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${sairaCondensed.variable} ${spaceGrotesk.variable} antialiased`}
     >
-      <body className="flex min-h-screen flex-col">{children}</body>
+      <body className="flex min-h-screen flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
