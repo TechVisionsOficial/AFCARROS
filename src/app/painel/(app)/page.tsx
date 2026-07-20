@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import type { StatusKanban } from "@/generated/prisma/client";
+import { CATEGORIA_GASTO_LABEL } from "@/lib/gastos";
 import { PeriodoSelect } from "./periodo-select";
 import {
   Secao,
@@ -30,14 +31,6 @@ const KANBAN_LABEL: Record<string, string> = {
 };
 
 const KANBAN_ORDEM = Object.keys(KANBAN_LABEL) as StatusKanban[];
-
-const CATEGORIA_GASTO_LABEL: Record<string, string> = {
-  MANUTENCAO: "Manutenção",
-  DOCUMENTACAO: "Documentação",
-  ESTETICA: "Estética",
-  FUNILARIA: "Funilaria",
-  OUTROS: "Outros",
-};
 
 function fmtMoeda(n: number) {
   return "R$ " + n.toLocaleString("pt-BR", { maximumFractionDigits: 0 });

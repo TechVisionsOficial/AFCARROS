@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { criarVeiculo, type NovoVeiculoState } from "./actions";
 import { CampoFotos } from "../campo-fotos";
 import { CampoMoeda } from "../../campo-moeda";
+import { CATEGORIAS_GASTO } from "@/lib/gastos";
 import { SeletorCliente, type ClienteOpcao } from "../../seletor-cliente";
 
 const ORIGENS = [
@@ -14,22 +15,6 @@ const ORIGENS = [
   { value: "CONSIGNADO", label: "Consignado" },
   { value: "OUTRO", label: "Outro" },
 ];
-
-const CATEGORIAS_GASTO = [
-  "Manutenção",
-  "Documentação",
-  "Estética",
-  "Funilaria",
-  "Outros",
-];
-
-const CATEGORIA_VALUE: Record<string, string> = {
-  Manutenção: "MANUTENCAO",
-  Documentação: "DOCUMENTACAO",
-  Estética: "ESTETICA",
-  Funilaria: "FUNILARIA",
-  Outros: "OUTROS",
-};
 
 const initialState: NovoVeiculoState = { error: null };
 
@@ -42,6 +27,7 @@ export function NovoVeiculoForm({
 }) {
   const [state, formAction, pending] = useActionState(criarVeiculo, initialState);
   const [gastos, setGastos] = useState<{ id: number; categoria: string; valor: string }[]>([]);
+  const [km, setKm] = useState("");
   const [precoCompra, setPrecoCompra] = useState("");
   const [precoVenda, setPrecoVenda] = useState("");
   const [precoMinimo, setPrecoMinimo] = useState("");
@@ -56,7 +42,7 @@ export function NovoVeiculoForm({
   }, []);
 
   function addGasto() {
-    setGastos((g) => [...g, { id: nextId, categoria: "Manutenção", valor: "" }]);
+    setGastos((g) => [...g, { id: nextId, categoria: CATEGORIAS_GASTO[0].value, valor: "" }]);
     setNextId((n) => n + 1);
   }
 
@@ -96,7 +82,15 @@ export function NovoVeiculoForm({
           <input name="modelo" required placeholder="Modelo" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
           <input name="anoFabricacao" type="number" required placeholder="Ano de fabricação" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
           <input name="ano" type="number" required placeholder="Ano modelo" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
-          <input name="km" type="number" required placeholder="Km" className="h-10 rounded-md border border-zinc-300 px-3 text-sm" />
+          <CampoMoeda
+            name="km"
+            required
+            prefixo=""
+            placeholder="Km"
+            value={km}
+            onChange={setKm}
+            className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
+          />
         </div>
         <textarea
           name="descricao"
@@ -181,18 +175,13 @@ export function NovoVeiculoForm({
               <div key={g.id} className="grid grid-cols-[1fr_140px_32px] gap-2">
                 <select
                   name="gastoCategoria"
-                  value={CATEGORIA_VALUE[g.categoria]}
-                  onChange={(e) => {
-                    const label = Object.keys(CATEGORIA_VALUE).find(
-                      (k) => CATEGORIA_VALUE[k] === e.target.value,
-                    );
-                    updateGasto(g.id, "categoria", label ?? "Manutenção");
-                  }}
+                  value={g.categoria}
+                  onChange={(e) => updateGasto(g.id, "categoria", e.target.value)}
                   className="h-9 rounded-md border border-zinc-300 px-2 text-sm"
                 >
                   {CATEGORIAS_GASTO.map((c) => (
-                    <option key={c} value={CATEGORIA_VALUE[c]}>
-                      {c}
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </select>

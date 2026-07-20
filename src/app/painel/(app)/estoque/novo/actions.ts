@@ -8,6 +8,7 @@ import { requireSession } from "@/lib/session";
 import { resolverCliente } from "@/lib/resolver-cliente";
 import { salvarArquivo, ehUrlBlobPublico } from "@/lib/storage";
 import { validarImagem } from "@/lib/upload";
+import { VALORES_GASTO_VALIDOS } from "@/lib/gastos";
 import type {
   CategoriaGasto,
   CondicaoVeiculo,
@@ -22,13 +23,6 @@ export type NovoVeiculoState = {
 const TIPOS: TipoVeiculo[] = ["CARRO", "MOTO"];
 const CONDICOES: CondicaoVeiculo[] = ["NOVO", "SEMINOVO"];
 const ORIGENS: OrigemAquisicao[] = ["LEILAO", "TROCA", "PARTICULAR", "CONSIGNADO", "OUTRO"];
-const CATEGORIAS_GASTO: CategoriaGasto[] = [
-  "MANUTENCAO",
-  "DOCUMENTACAO",
-  "ESTETICA",
-  "FUNILARIA",
-  "OUTROS",
-];
 
 function parseNumero(valor: FormDataEntryValue | null): number | null {
   if (!valor) return null;
@@ -75,7 +69,7 @@ export async function criarVeiculo(
   if (!marca || !modelo) {
     return { error: "Informe marca e modelo." };
   }
-  if (!ano || !anoFabricacao || !km) {
+  if (!ano || !anoFabricacao || km === null || km < 0) {
     return { error: "Informe ano de fabricação, ano modelo e km válidos." };
   }
   if (!CONDICOES.includes(condicao as CondicaoVeiculo)) {
@@ -96,7 +90,7 @@ export async function criarVeiculo(
   for (let i = 0; i < categorias.length; i++) {
     const categoria = String(categorias[i]);
     const valor = parseNumero(valores[i]);
-    if (!CATEGORIAS_GASTO.includes(categoria as CategoriaGasto) || valor === null) continue;
+    if (!VALORES_GASTO_VALIDOS.has(categoria) || valor === null) continue;
     gastos.push({
       categoria: categoria as CategoriaGasto,
       valor,

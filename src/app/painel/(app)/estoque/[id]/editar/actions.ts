@@ -8,6 +8,7 @@ import { requireSession } from "@/lib/session";
 import { resolverCliente } from "@/lib/resolver-cliente";
 import { apagarArquivo, salvarArquivo, ehUrlBlobPublico } from "@/lib/storage";
 import { validarImagem, validarDocumento } from "@/lib/upload";
+import { VALORES_GASTO_VALIDOS } from "@/lib/gastos";
 import type {
   CategoriaDocumento,
   CategoriaGasto,
@@ -31,14 +32,6 @@ const CATEGORIAS_DOC: CategoriaDocumento[] = [
   "VISTORIA",
   "OUTRO",
 ];
-const CATEGORIAS_GASTO: CategoriaGasto[] = [
-  "MANUTENCAO",
-  "DOCUMENTACAO",
-  "ESTETICA",
-  "FUNILARIA",
-  "OUTROS",
-];
-
 function parseNumero(valor: FormDataEntryValue | null): number | null {
   if (!valor) return null;
   const n = Number(valor);
@@ -85,7 +78,7 @@ export async function atualizarVeiculo(
   if (!marca || !modelo) {
     return { error: "Informe marca e modelo." };
   }
-  if (!ano || !anoFabricacao || !km) {
+  if (!ano || !anoFabricacao || km === null || km < 0) {
     return { error: "Informe ano de fabricação, ano modelo e km válidos." };
   }
   if (!CONDICOES.includes(condicao as CondicaoVeiculo)) {
@@ -105,7 +98,7 @@ export async function atualizarVeiculo(
   for (let i = 0; i < categorias.length; i++) {
     const categoria = String(categorias[i]);
     const valor = parseNumero(valores[i]);
-    if (!CATEGORIAS_GASTO.includes(categoria as CategoriaGasto) || valor === null) continue;
+    if (!VALORES_GASTO_VALIDOS.has(categoria) || valor === null) continue;
     novosGastos.push({ categoria: categoria as CategoriaGasto, valor, descricao: null });
   }
 

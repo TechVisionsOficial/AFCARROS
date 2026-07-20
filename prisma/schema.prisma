@@ -40,10 +40,21 @@ enum OrigemAquisicao {
 }
 
 enum CategoriaGasto {
+  // Antigos: mantidos para gastos já lançados; não aparecem mais no cadastro.
   MANUTENCAO
   DOCUMENTACAO
   ESTETICA
+  // Em uso hoje (ver src/lib/gastos.ts para a lista e a ordem do formulário):
+  DESPACHANTE
+  POLIMENTO
   FUNILARIA
+  MARTELINHO
+  TAPECARIA
+  MECANICO
+  PECAS
+  LAUDO
+  DIVIDA_ATIVA
+  DEBITOS_DETRAN
   OUTROS
 }
 

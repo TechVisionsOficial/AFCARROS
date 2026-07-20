@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { CATEGORIA_GASTO_LABEL } from "@/lib/gastos";
 
 /**
  * Monta um retrato textual dos dados atuais da loja para o AFCARROS AI.
@@ -152,7 +153,7 @@ export async function montarContexto(): Promise<string> {
     p("- Por ano:");
     for (const [ano, val] of porAnoGasto) p(`  · ${ano}: ${brl(val)}`);
     p("- Por categoria:");
-    for (const [cat, val] of porCatGasto) p(`  · ${cat}: ${brl(val)}`);
+    for (const [cat, val] of porCatGasto) p(`  · ${CATEGORIA_GASTO_LABEL[cat] ?? cat}: ${brl(val)}`);
   }
   p("");
 

@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { atualizarVeiculo, removerFoto, removerGasto, type EditarVeiculoState } from "./actions";
 import { CampoFotos } from "../../campo-fotos";
 import { CampoMoeda } from "../../../campo-moeda";
+import { CATEGORIAS_GASTO, CATEGORIA_GASTO_LABEL } from "@/lib/gastos";
 import { SeletorCliente, type ClienteOpcao } from "../../../seletor-cliente";
 
 const ORIGENS = [
@@ -15,24 +16,6 @@ const ORIGENS = [
   { value: "CONSIGNADO", label: "Consignado" },
   { value: "OUTRO", label: "Outro" },
 ];
-
-const CATEGORIAS_GASTO = ["Manutenção", "Documentação", "Estética", "Funilaria", "Outros"];
-
-const CATEGORIA_VALUE: Record<string, string> = {
-  Manutenção: "MANUTENCAO",
-  Documentação: "DOCUMENTACAO",
-  Estética: "ESTETICA",
-  Funilaria: "FUNILARIA",
-  Outros: "OUTROS",
-};
-
-const CATEGORIA_LABEL: Record<string, string> = {
-  MANUTENCAO: "Manutenção",
-  DOCUMENTACAO: "Documentação",
-  ESTETICA: "Estética",
-  FUNILARIA: "Funilaria",
-  OUTROS: "Outros",
-};
 
 type VeiculoEdicao = {
   id: string;
@@ -75,6 +58,7 @@ export function EditarVeiculoForm({
   const [enviandoFotos, setEnviandoFotos] = useState(false);
 
   const [gastosNovos, setGastosNovos] = useState<{ id: number; categoria: string; valor: string }[]>([]);
+  const [km, setKm] = useState(String(veiculo.km));
   // Reais inteiros (só dígitos) para o CampoMoeda. Arredonda dados antigos que
   // por acaso tenham centavos, mantendo tudo consistente com o campo novo.
   const [precoCompra, setPrecoCompra] = useState(String(Math.round(veiculo.precoCompra)));
@@ -83,7 +67,7 @@ export function EditarVeiculoForm({
   const [nextId, setNextId] = useState(0);
 
   function addGasto() {
-    setGastosNovos((g) => [...g, { id: nextId, categoria: "Manutenção", valor: "" }]);
+    setGastosNovos((g) => [...g, { id: nextId, categoria: CATEGORIAS_GASTO[0].value, valor: "" }]);
     setNextId((n) => n + 1);
   }
 
@@ -158,12 +142,13 @@ export function EditarVeiculoForm({
             placeholder="Ano modelo"
             className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
           />
-          <input
+          <CampoMoeda
             name="km"
-            type="number"
             required
-            defaultValue={veiculo.km}
+            prefixo=""
             placeholder="Km"
+            value={km}
+            onChange={setKm}
             className="h-10 rounded-md border border-zinc-300 px-3 text-sm"
           />
         </div>
@@ -285,7 +270,7 @@ export function EditarVeiculoForm({
               {gastosExistentes.map((g) => (
                 <div key={g.id} className="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm">
                   <span>
-                    {CATEGORIA_LABEL[g.categoria] ?? g.categoria} — {fmt(g.valor)}
+                    {CATEGORIA_GASTO_LABEL[g.categoria] ?? g.categoria} — {fmt(g.valor)}
                   </span>
                   <button
                     type="button"
@@ -305,18 +290,13 @@ export function EditarVeiculoForm({
               <div key={g.id} className="grid grid-cols-[1fr_140px_32px] gap-2">
                 <select
                   name="gastoCategoria"
-                  value={CATEGORIA_VALUE[g.categoria]}
-                  onChange={(e) => {
-                    const label = Object.keys(CATEGORIA_VALUE).find(
-                      (k) => CATEGORIA_VALUE[k] === e.target.value,
-                    );
-                    updateGastoNovo(g.id, "categoria", label ?? "Manutenção");
-                  }}
+                  value={g.categoria}
+                  onChange={(e) => updateGastoNovo(g.id, "categoria", e.target.value)}
                   className="h-9 rounded-md border border-zinc-300 px-2 text-sm"
                 >
                   {CATEGORIAS_GASTO.map((c) => (
-                    <option key={c} value={CATEGORIA_VALUE[c]}>
-                      {c}
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </select>
