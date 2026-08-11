@@ -46,6 +46,13 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(6px); }
 }
+/* Entrada do modal da galeria (antes era feita pelo framer-motion, que
+   atrapalhava o toque nas setas no celular). */
+@keyframes af-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes af-modal-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .af-reveal { animation: af-reveal-up 0.7s ease-out both; }
@@ -55,6 +62,8 @@ body {
   .af-delay-2 { animation-delay: 0.2s; }
   .af-delay-3 { animation-delay: 0.3s; }
   .af-bounce { animation: af-bounce 1.4s ease-in-out infinite; }
+  .af-modal-overlay { animation: af-modal-fade 0.2s ease-out both; }
+  .af-modal-card { animation: af-modal-pop 0.2s ease-out both; }
 }
 
 /*

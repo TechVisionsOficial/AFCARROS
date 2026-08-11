@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { linkWhatsapp, INSTAGRAM_URL, FACEBOOK_URL } from "@/lib/contato";
 import { IconeWhatsapp, IconeInstagram, IconeFacebook } from "./icones";
 
@@ -139,11 +138,29 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
   const [indice, setIndice] = useState(0);
   const fotos = veiculo.fotos;
 
+  const proxima = () => setIndice((i) => (i + 1) % Math.max(fotos.length, 1));
+  const anterior = () => setIndice((i) => (i - 1 + fotos.length) % Math.max(fotos.length, 1));
+
+  // Deslizar (swipe) para trocar de foto no celular — o gesto que todo mundo
+  // espera, e que não depende de acertar a setinha.
+  const toqueX = useRef<number | null>(null);
+  function aoToqueInicio(e: React.TouchEvent) {
+    toqueX.current = e.touches[0].clientX;
+  }
+  function aoToqueFim(e: React.TouchEvent) {
+    if (toqueX.current === null || fotos.length < 2) return;
+    const delta = e.changedTouches[0].clientX - toqueX.current;
+    toqueX.current = null;
+    if (Math.abs(delta) < 40) return; // foi um toque, não um arraste
+    if (delta < 0) proxima();
+    else anterior();
+  }
+
   useEffect(() => {
     function aoTeclar(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") setIndice((i) => (i + 1) % Math.max(fotos.length, 1));
-      if (e.key === "ArrowLeft") setIndice((i) => (i - 1 + fotos.length) % Math.max(fotos.length, 1));
+      if (e.key === "ArrowRight") proxima();
+      if (e.key === "ArrowLeft") anterior();
     }
     window.addEventListener("keydown", aoTeclar);
     document.body.style.overflow = "hidden";
@@ -151,27 +168,25 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
       window.removeEventListener("keydown", aoTeclar);
       document.body.style.overflow = "";
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fotos.length, onClose]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
       onClick={onClose}
       style={{ zIndex: 100 }}
-      className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-black/70 p-4"
+      className="af-modal-overlay fixed inset-0 flex items-center justify-center overflow-y-auto bg-black/70 p-4"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        transition={{ duration: 0.2 }}
+      <div
         onClick={(e) => e.stopPropagation()}
         style={{ maxHeight: "90vh" }}
-        className="flex w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white"
+        className="af-modal-card flex w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white"
       >
-        <div className="relative h-64 shrink-0 bg-zinc-100 sm:h-72">
+        <div
+          onTouchStart={aoToqueInicio}
+          onTouchEnd={aoToqueFim}
+          className="relative h-64 shrink-0 bg-zinc-100 sm:h-72"
+        >
           {fotos.length > 0 ? (
             <Image
               src={fotos[indice]}
@@ -197,17 +212,17 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
             <>
               <button
                 type="button"
-                onClick={() => setIndice((i) => (i - 1 + fotos.length) % fotos.length)}
+                onClick={anterior}
                 aria-label="Foto anterior"
-                className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-lg text-white"
               >
                 ‹
               </button>
               <button
                 type="button"
-                onClick={() => setIndice((i) => (i + 1) % fotos.length)}
+                onClick={proxima}
                 aria-label="Próxima foto"
-                className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white"
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-lg text-white"
               >
                 ›
               </button>
@@ -244,8 +259,8 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
             <BotoesContato veiculo={veiculo} />
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
