@@ -15,9 +15,27 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
 });
 
+const DESCRICAO =
+  "Estoque de carros e motos da AFCARROS. Confira, compare e fale direto com a loja pelo WhatsApp.";
+
 export const metadata: Metadata = {
+  // Base para URLs absolutas (Open Graph, canonical). Sem isso o Google e as
+  // prévias de link recebem caminhos relativos.
+  metadataBase: new URL("https://www.afcarros.com.br"),
   title: "AFCARROS — 0km, seminovos e importados",
-  description: "Estoque de carros e motos da AFCARROS. Confira, compare e fale direto com a loja pelo WhatsApp.",
+  description: DESCRICAO,
+  applicationName: "AFCARROS",
+  alternates: { canonical: "/" },
+  // Prévia quando o link é compartilhado (WhatsApp, Instagram, Facebook).
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "/",
+    siteName: "AFCARROS",
+    title: "AFCARROS — carros e motos seminovos em São Paulo",
+    description: DESCRICAO,
+    images: [{ url: "/branding/logo-fundo-claro.png", alt: "AFCARROS" }],
+  },
 };
 
 export const viewport: Viewport = {
