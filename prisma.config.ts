@@ -11,6 +11,12 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // A CLI (migrate deploy no build da Vercel) usa a conexão DIRETA do Neon.
+    // Antes de migrar, o Prisma pega uma trava no Postgres (pg_advisory_lock),
+    // e essa trava não funciona através do pooler: pode ficar presa numa
+    // conexão que o pooler mantém aberta e travar os próximos builds (erro
+    // P1002). O app em si continua usando DATABASE_URL, com pooler — ver
+    // src/lib/prisma.ts. Localmente não há _UNPOOLED, então cai no DATABASE_URL.
+    url: process.env["DATABASE_URL_UNPOOLED"] ?? process.env["DATABASE_URL"],
   },
 });
