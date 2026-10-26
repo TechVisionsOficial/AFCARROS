@@ -31,7 +31,13 @@ const ORIGEM_LABEL: Record<string, string> = {
   OUTRO: "Outro",
 };
 
-function LeadCard({ lead }: { lead: LeadComRelacoes }) {
+function LeadCard({
+  lead,
+  onMover,
+}: {
+  lead: LeadComRelacoes;
+  onMover: (leadId: string, status: StatusKanban) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
   });
@@ -62,6 +68,27 @@ function LeadCard({ lead }: { lead: LeadComRelacoes }) {
       <span className="mt-2 inline-block rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] text-zinc-600">
         {ORIGEM_LABEL[lead.origem] ?? lead.origem}
       </span>
+
+      {/*
+        Arrastar com o dedo não funciona de forma confiável no iPhone (o toque
+        vira rolagem da tela). No celular, a etapa muda por este seletor.
+        O card inteiro escuta o início do arraste; por isso o seletor barra
+        pointerdown/keydown, senão tocar nele começaria um arraste.
+      */}
+      <select
+        aria-label={`Etapa de ${lead.cliente.nome}`}
+        value={lead.statusKanban}
+        onChange={(e) => onMover(lead.id, e.target.value as StatusKanban)}
+        onPointerDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        className="mt-2 block h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm text-brand-graphite md:hidden"
+      >
+        {COLUNAS.map((c) => (
+          <option key={c.status} value={c.status}>
+            {c.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -70,10 +97,12 @@ function Column({
   status,
   label,
   leads,
+  onMover,
 }: {
   status: StatusKanban;
   label: string;
   leads: LeadComRelacoes[];
+  onMover: (leadId: string, status: StatusKanban) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -90,7 +119,7 @@ function Column({
         }`}
       >
         {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
+          <LeadCard key={lead.id} lead={lead} onMover={onMover} />
         ))}
       </div>
     </div>
@@ -105,13 +134,8 @@ export function Board({ leads: leadsIniciais }: { leads: LeadComRelacoes[] }) {
     setLeads(leadsIniciais);
   }, [leadsIniciais]);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over) return;
-
-    const novoStatus = over.id as StatusKanban;
-    const leadId = active.id as string;
-
+  // Usado pelo arraste (computador) e pelo seletor do card (celular).
+  function mover(leadId: string, novoStatus: StatusKanban) {
     setLeads((atual) =>
       atual.map((lead) =>
         lead.id === leadId ? { ...lead, statusKanban: novoStatus } : lead,
@@ -123,6 +147,12 @@ export function Board({ leads: leadsIniciais }: { leads: LeadComRelacoes[] }) {
     });
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    mover(active.id as string, over.id as StatusKanban);
+  }
+
   return (
     <DndContext id="leads-kanban" onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-4">
@@ -132,6 +162,7 @@ export function Board({ leads: leadsIniciais }: { leads: LeadComRelacoes[] }) {
             status={coluna.status}
             label={coluna.label}
             leads={leads.filter((lead) => lead.statusKanban === coluna.status)}
+            onMover={mover}
           />
         ))}
       </div>

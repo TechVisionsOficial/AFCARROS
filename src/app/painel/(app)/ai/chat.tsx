@@ -84,8 +84,11 @@ export function ChatAI({
 
   const vazio = mensagens.length === 0 && !otimista;
 
+  // Altura = tela menos o que fica em volta: no celular, barra do topo (4rem) +
+  // padding do <main> (2rem); no computador, só o padding (4rem). dvh em vez de
+  // vh para não ficar atrás da barra do Safari, que aparece e some.
   return (
-    <div className="mx-auto flex h-[calc(100vh-2rem)] max-w-3xl flex-col md:h-[calc(100vh-4rem)]">
+    <div className="mx-auto flex h-[calc(100dvh-6rem)] max-w-3xl flex-col md:h-[calc(100dvh-4rem)]">
       {/* Cabeçalho */}
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
