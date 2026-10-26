@@ -13,7 +13,7 @@ export default async function PainelLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="painel flex min-h-screen flex-col md:flex-row">
       <PainelSidebar nome={session.nome} />
       <main className="min-w-0 flex-1 bg-zinc-50 p-4 md:p-8">{children}</main>
     </div>

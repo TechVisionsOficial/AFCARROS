@@ -328,7 +328,7 @@ export function EditarVeiculoForm({
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-md bg-white p-3">
             <p className="text-xs text-brand-gray">Total de gastos</p>
             <p className="text-lg font-medium">{fmt(totalGastos)}</p>
