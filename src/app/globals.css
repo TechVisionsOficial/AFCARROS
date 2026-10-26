@@ -25,6 +25,21 @@ body {
 }
 
 /*
+  Painel no celular: o iPhone dá zoom na tela inteira ao tocar num campo com
+  letra menor que 16px — e quase todos os campos do painel usam text-sm/xs.
+  Esta regra fica FORA de @layer de propósito: assim vence as classes text-*
+  do Tailwind (que ficam em @layer utilities) só nesses campos e só em tela
+  estreita. No computador, nada muda.
+*/
+@media (max-width: 767px) {
+  .painel input,
+  .painel select,
+  .painel textarea {
+    font-size: 16px;
+  }
+}
+
+/*
   Animações de entrada em CSS puro.
   IMPORTANTE: o estado de repouso (sem animação) é SEMPRE visível — o conteúdo
   nunca depende de JavaScript para aparecer. Isso garante que funcione em

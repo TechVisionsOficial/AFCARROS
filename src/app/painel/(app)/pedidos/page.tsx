@@ -31,7 +31,7 @@ export default async function PedidosPage() {
     <div className="flex flex-col gap-12">
       {/* Pedidos */}
       <section>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-medium text-brand-graphite">Pedidos</h1>
             <p className="text-sm text-brand-gray">Veículos que clientes estão procurando.</p>
@@ -73,7 +73,7 @@ export default async function PedidosPage() {
 
       {/* Ofertas */}
       <section>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-medium text-brand-graphite">Ofertas</h1>
             <p className="text-sm text-brand-gray">Veículos que ofereceram para a loja.</p>
