@@ -4,7 +4,7 @@ import { IconeWhatsapp, IconeInstagram, IconeFacebook } from "./icones";
 
 export function Rodape() {
   return (
-    <footer className="flex flex-col items-center gap-6 bg-brand-graphite px-6 py-12">
+    <footer className="flex flex-col items-center gap-6 bg-faixa-escura px-6 py-12">
       <Image
         src="/branding/logo-fundo-escuro.png"
         alt="AFCARROS"

@@ -41,6 +41,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Barra do navegador no celular na mesma cor da barra do topo do site.
+  themeColor: "#141416",
 };
 
 export default function RootLayout({

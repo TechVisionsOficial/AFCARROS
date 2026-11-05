@@ -6,6 +6,47 @@
   --brand-red: #da1f2b;
   --brand-graphite: #141416;
   --brand-gray: #6f6d66;
+
+  /*
+    Site público (vitrine): as seções intercalam uma faixa ESCURA (grafite da
+    marca) e uma CLARA. Cada cor tem nome e um valor para o modo claro e outro
+    para o escuro (abaixo). O painel não usa estes nomes, então não muda.
+  */
+  --faixa-clara: #ffffff;
+  --faixa-escura: #141416;
+  --tinta: #141416; /* texto principal nas faixas claras */
+  --tinta-suave: #6f6d66; /* texto secundário nas faixas claras */
+  --cartao: #ffffff; /* cartões e campos sobre a faixa clara */
+  --borda: #e4e4e7;
+  --campo-borda: #d4d4d8;
+  --foto-vazia: #f4f4f5; /* fundo de foto ausente / hover leve */
+  --botao: #141416; /* botão principal sobre faixa clara */
+  --botao-texto: #ffffff;
+}
+
+/*
+  Modo escuro (segue a configuração do aparelho). A faixa "clara" vira um
+  cinza-escuro e a escura fica mais funda, para a alternância continuar
+  visível; texto e botão principal se invertem.
+*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --faixa-clara: #1c1c20;
+    --faixa-escura: #0e0e10;
+    --tinta: #f4f4f5;
+    --tinta-suave: #a8a6a0;
+    --cartao: #26262b;
+    --borda: rgb(255 255 255 / 0.1);
+    --campo-borda: rgb(255 255 255 / 0.2);
+    --foto-vazia: #2e2e34;
+    --botao: #f4f4f5;
+    --botao-texto: #141416;
+  }
+}
+
+/* Controles nativos (lista dos filtros, rolagem) acompanham o modo, só no site. */
+.site-publico {
+  color-scheme: light dark;
 }
 
 @theme inline {
@@ -14,6 +55,16 @@
   --color-brand-red: var(--brand-red);
   --color-brand-graphite: var(--brand-graphite);
   --color-brand-gray: var(--brand-gray);
+  --color-faixa-clara: var(--faixa-clara);
+  --color-faixa-escura: var(--faixa-escura);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-cartao: var(--cartao);
+  --color-borda: var(--borda);
+  --color-campo-borda: var(--campo-borda);
+  --color-foto-vazia: var(--foto-vazia);
+  --color-botao: var(--botao);
+  --color-botao-texto: var(--botao-texto);
   --font-wordmark: var(--font-wordmark);
   --font-support: var(--font-support);
 }

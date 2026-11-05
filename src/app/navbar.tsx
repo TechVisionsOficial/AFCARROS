@@ -7,14 +7,14 @@ const LINKS = [
   { href: "#localizacao", label: "Onde estamos" },
 ];
 
-// Sempre visível: o site abre direto no estoque, sem bloco de abertura, então
-// a barra é o que apresenta a marca desde o primeiro instante.
+// Sempre visível e escura: emenda com o banner no topo e continua apresentando
+// a marca quando a pessoa rola pelo estoque.
 export function Navbar() {
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-black/5 bg-white/90 px-4 py-3 backdrop-blur-sm sm:px-6">
+    <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-white/10 bg-faixa-escura/90 px-4 py-3 backdrop-blur-sm sm:px-6">
       <a
         href="#inicio"
-        className="flex shrink-0 items-center rounded-full bg-brand-graphite px-4 py-2"
+        className="flex shrink-0 items-center py-2"
       >
         <Image
           src="/branding/logo-fundo-escuro.png"
@@ -30,7 +30,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-brand-graphite transition-colors hover:text-brand-red"
+              className="text-sm text-white/80 transition-colors hover:text-white"
               style={{ fontFamily: "var(--font-support)" }}
             >
               {link.label}

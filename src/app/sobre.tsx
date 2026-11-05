@@ -5,7 +5,7 @@ export function Sobre() {
   return (
     <section
       id="sobre"
-      className="flex flex-col items-center gap-10 bg-brand-graphite px-6 py-24 md:flex-row md:justify-center md:gap-16"
+      className="flex flex-col items-center gap-10 bg-faixa-escura px-6 py-24 md:flex-row md:justify-center md:gap-16"
     >
       <AoRolar direcao="esquerda" className="overflow-hidden rounded-2xl">
         <Image
