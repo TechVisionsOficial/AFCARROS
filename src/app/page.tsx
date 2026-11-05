@@ -6,7 +6,6 @@ import {
   FACEBOOK_URL,
 } from "@/lib/contato";
 import { Navbar } from "./navbar";
-import { Hero } from "./hero";
 import { Sobre } from "./sobre";
 import { EstoquePublico, type VeiculoPublico } from "./estoque-publico";
 import { Localizacao } from "./localizacao";
@@ -86,15 +85,15 @@ export default async function Home() {
   }));
 
   return (
-    <div className="flex flex-col flex-1">
+    <div id="inicio" className="flex flex-col flex-1">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(DADOS_ESTRUTURADOS) }}
       />
       <Navbar />
-      <Hero />
-      <Sobre />
+      {/* O site abre direto no estoque; quem é o dono e onde fica a loja vêm depois. */}
       <EstoquePublico veiculos={veiculos} />
+      <Sobre />
       <Localizacao />
       <Rodape />
     </div>

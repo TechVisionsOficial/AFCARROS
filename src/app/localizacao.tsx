@@ -27,7 +27,7 @@ function IconeRota({ className }: { className?: string }) {
 
 export function Localizacao() {
   return (
-    <section id="localizacao" className="bg-brand-graphite px-6 py-24">
+    <section id="localizacao" className="border-t border-white/10 bg-brand-graphite px-6 py-24">
       <div className="mx-auto max-w-5xl">
         <div className="af-reveal">
           <p

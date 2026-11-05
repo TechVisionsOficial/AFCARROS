@@ -285,18 +285,22 @@ function Seletor({
   valor,
   onChange,
   children,
+  className = "",
 }: {
   rotulo: string;
   valor: string;
   onChange: (v: string) => void;
   children: React.ReactNode;
+  className?: string;
 }) {
+  // No celular: largura total da coluna e letra de 16px (abaixo disso o iPhone
+  // dá zoom na tela ao tocar). No computador, tamanho natural e text-sm.
   return (
     <select
       aria-label={rotulo}
       value={valor}
       onChange={(e) => onChange(e.target.value)}
-      className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm text-brand-graphite outline-none focus:border-brand-red"
+      className={`h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-base text-brand-graphite outline-none focus:border-brand-red sm:w-auto sm:text-sm ${className}`}
     >
       {children}
     </select>
@@ -352,10 +356,28 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
   }
 
   return (
-    <section id="estoque" className="bg-white px-6 py-24">
-      <h2 className="af-reveal mx-auto mb-6 max-w-5xl text-center text-2xl font-medium text-brand-graphite">
-        Estoque disponível
-      </h2>
+    <section id="estoque" className="bg-white px-6 pb-24 pt-24 sm:pt-28">
+      {/*
+        Apresentação curta: o site abre aqui, direto nos carros. O padding de
+        cima deixa espaço para a barra do topo, que é fixa.
+      */}
+      <div className="af-reveal mx-auto mb-8 max-w-5xl text-center">
+        <p
+          className="text-sm text-brand-red"
+          style={{ fontFamily: "var(--font-support)", letterSpacing: "3px" }}
+        >
+          CARROS E MOTOS · SÃO PAULO
+        </p>
+        <h1
+          className="mt-2 text-3xl font-medium italic text-brand-graphite sm:text-4xl"
+          style={{ fontFamily: "var(--font-wordmark)" }}
+        >
+          Estoque disponível
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-brand-gray" style={{ fontFamily: "var(--font-support)" }}>
+          Escolha o carro e fale direto com quem decide, pelo WhatsApp — sem intermediários.
+        </p>
+      </div>
 
       {veiculos.length === 0 ? (
         <p className="text-center text-brand-gray">
@@ -364,7 +386,7 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
       ) : (
         <>
           {/* Filtros */}
-          <div className="mx-auto mb-3 flex max-w-5xl flex-wrap items-center justify-center gap-2">
+          <div className="mx-auto mb-3 grid max-w-5xl grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center">
             <Seletor rotulo="Tipo de veículo" valor={tipo} onChange={setTipo}>
               <option value="todos">Carros e motos</option>
               <option value="CARRO">Carros</option>
@@ -394,7 +416,7 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
               ))}
             </Seletor>
 
-            <Seletor rotulo="Ordenar por" valor={ordem} onChange={setOrdem}>
+            <Seletor rotulo="Ordenar por" valor={ordem} onChange={setOrdem} className="col-span-2">
               {ORDENACOES.map((o) => (
                 <option key={o.valor} value={o.valor}>
                   {o.label}
