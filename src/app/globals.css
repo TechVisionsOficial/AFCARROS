@@ -119,6 +119,14 @@ html {
   scroll-padding-top: 80px;
 }
 
+/* Rolagem suave ao clicar nos links do topo (só no site público, e respeitando
+   quem pediu ao aparelho para reduzir animações). */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.site-publico) {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
