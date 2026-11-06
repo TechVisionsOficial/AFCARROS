@@ -40,7 +40,30 @@ export async function login(
     };
   }
 
-  const usuario = await prisma.usuario.findUnique({ where: { email } });
+  // Falha de banco (conexão caída, banco acordando) não pode virar tela de
+  // erro: devolve uma mensagem e registra no log da Vercel com a marca [login].
+  // Não conta como tentativa errada, e o log não leva o e-mail digitado.
+  let usuario;
+  try {
+    usuario = await prisma.usuario.findUnique({ where: { email } });
+  } catch (err) {
+    const e = err as { name?: string; code?: string; message?: string; meta?: unknown };
+    console.error("[login] falha ao consultar o banco", {
+      nome: e.name,
+      codigo: e.code,
+      // Detalhes do erro do driver (tipo, código original) — sem valores.
+      meta: e.meta,
+      // A mensagem do Prisma mistura "Invalid ... invocation in", caminho do
+      // arquivo e trecho de código; fica só a linha que descreve a causa.
+      mensagem: e.message
+        ?.split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l && !l.includes("invocation in") && !/^(→\s*)?\d+\s/.test(l) && !l.startsWith("/"))
+        .at(-1)
+        ?.slice(0, 200),
+    });
+    return { error: "Não foi possível conectar agora. Tente de novo em alguns segundos." };
+  }
 
   // Compara sempre (contra o hash real ou o dummy) para tempo constante.
   const senhaValida = await bcrypt.compare(senha, usuario?.senhaHash ?? DUMMY_HASH);
