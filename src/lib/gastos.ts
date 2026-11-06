@@ -18,6 +18,18 @@ export const CATEGORIAS_GASTO = [
   { label: "Laudo", value: "LAUDO" },
   { label: "Dívida ativa", value: "DIVIDA_ATIVA" },
   { label: "Débitos detran", value: "DEBITOS_DETRAN" },
+  { label: "Comissão", value: "COMISSAO" },
+  { label: "Juros", value: "JUROS" },
+  { label: "Anúncio", value: "ANUNCIO" },
+  { label: "Volante", value: "VOLANTE" },
+  { label: "Cartório", value: "CARTORIO" },
+  { label: "Uber", value: "UBER" },
+  { label: "João Mecânico", value: "JOAO_MECANICO" },
+  { label: "Feira do automóvel", value: "FEIRA_DO_AUTOMOVEL" },
+  { label: "Mercadocar", value: "MERCADOCAR" },
+  { label: "Carlão peças", value: "CARLAO_PECAS" },
+  { label: "Contrato Renav", value: "CONTRATO_RENAV" },
+  { label: "Combustível", value: "COMBUSTIVEL" },
   { label: "Outros", value: "OUTROS" },
 ] as const;
 
