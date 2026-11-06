@@ -6,7 +6,7 @@ import {
   FACEBOOK_URL,
 } from "@/lib/contato";
 import { Navbar } from "./navbar";
-import { Hero } from "./hero";
+import { Banner } from "./banner";
 import { Sobre } from "./sobre";
 import { EstoquePublico, type VeiculoPublico } from "./estoque-publico";
 import { Localizacao } from "./localizacao";
@@ -86,15 +86,19 @@ export default async function Home() {
   }));
 
   return (
-    <div className="flex flex-col flex-1">
+    <div id="inicio" className="site-publico flex flex-col flex-1">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(DADOS_ESTRUTURADOS) }}
       />
       <Navbar />
-      <Hero />
-      <Sobre />
+      {/*
+        Faixas intercaladas: banner (escuro) → estoque (claro) → Alexandro
+        (escuro) → onde estamos (claro) → rodapé (escuro).
+      */}
+      <Banner />
       <EstoquePublico veiculos={veiculos} />
+      <Sobre />
       <Localizacao />
       <Rodape />
     </div>

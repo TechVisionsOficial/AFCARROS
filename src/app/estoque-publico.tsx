@@ -59,7 +59,7 @@ function BotoesContato({ veiculo }: { veiculo: VeiculoPublico }) {
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         aria-label="Instagram da AFCARROS"
-        className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 text-brand-graphite transition-colors hover:bg-zinc-100"
+        className="flex h-10 w-10 items-center justify-center rounded-md border border-campo-borda text-tinta transition-colors hover:bg-foto-vazia"
       >
         <IconeInstagram className="h-4 w-4" />
       </a>
@@ -69,7 +69,7 @@ function BotoesContato({ veiculo }: { veiculo: VeiculoPublico }) {
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         aria-label="Facebook da AFCARROS"
-        className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 text-brand-graphite transition-colors hover:bg-zinc-100"
+        className="flex h-10 w-10 items-center justify-center rounded-md border border-campo-borda text-tinta transition-colors hover:bg-foto-vazia"
       >
         <IconeFacebook className="h-4 w-4" />
       </a>
@@ -92,9 +92,9 @@ function VeiculoCard({
   return (
     <div
       onClick={onClick}
-      className={`af-reveal ${atraso} cursor-pointer overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-shadow hover:shadow-md`}
+      className={`af-reveal ${atraso} cursor-pointer overflow-hidden rounded-2xl border border-borda bg-cartao transition-shadow hover:shadow-md`}
     >
-      <div className="relative bg-zinc-100" style={{ aspectRatio: "4 / 3" }}>
+      <div className="relative bg-foto-vazia" style={{ aspectRatio: "4 / 3" }}>
         {capa ? (
           <Image
             src={capa}
@@ -104,7 +104,7 @@ function VeiculoCard({
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-brand-gray">Sem foto</div>
+          <div className="flex h-full items-center justify-center text-xs text-tinta-suave">Sem foto</div>
         )}
         {veiculo.status === "RESERVADO" && (
           <span className="absolute left-3 top-3 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
@@ -118,13 +118,13 @@ function VeiculoCard({
         )}
       </div>
       <div className="p-4">
-        <p className="text-base font-medium text-brand-graphite">
+        <p className="text-base font-medium text-tinta">
           {veiculo.marca} {veiculo.modelo}
         </p>
-        <p className="mt-0.5 text-sm text-brand-gray">
+        <p className="mt-0.5 text-sm text-tinta-suave">
           {fmtAno(veiculo)} · {veiculo.km.toLocaleString("pt-BR")} km · {CONDICAO_LABEL[veiculo.condicao]}
         </p>
-        <p className="mt-2 text-lg font-medium text-brand-graphite">{fmtMoeda(veiculo.precoVenda)}</p>
+        <p className="mt-2 text-lg font-medium text-tinta">{fmtMoeda(veiculo.precoVenda)}</p>
 
         <div className="mt-4">
           <BotoesContato veiculo={veiculo} />
@@ -180,12 +180,12 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
       <div
         onClick={(e) => e.stopPropagation()}
         style={{ maxHeight: "90vh" }}
-        className="af-modal-card flex w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white"
+        className="af-modal-card flex w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-cartao"
       >
         <div
           onTouchStart={aoToqueInicio}
           onTouchEnd={aoToqueFim}
-          className="relative h-64 shrink-0 bg-zinc-100 sm:h-72"
+          className="relative h-64 shrink-0 bg-foto-vazia sm:h-72"
         >
           {fotos.length > 0 ? (
             <Image
@@ -196,7 +196,7 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-brand-gray">Sem foto</div>
+            <div className="flex h-full items-center justify-center text-sm text-tinta-suave">Sem foto</div>
           )}
 
           <button
@@ -242,17 +242,17 @@ function GaleriaModal({ veiculo, onClose }: { veiculo: VeiculoPublico; onClose: 
         </div>
 
         <div className="overflow-y-auto p-6">
-          <p className="text-xl font-medium text-brand-graphite">
+          <p className="text-xl font-medium text-tinta">
             {veiculo.marca} {veiculo.modelo}
           </p>
-          <p className="mt-1 text-sm text-brand-gray">
+          <p className="mt-1 text-sm text-tinta-suave">
             {TIPO_LABEL[veiculo.tipo]} · {fmtAno(veiculo)} · {veiculo.km.toLocaleString("pt-BR")} km ·{" "}
             {CONDICAO_LABEL[veiculo.condicao]}
           </p>
-          <p className="mt-3 text-2xl font-medium text-brand-graphite">{fmtMoeda(veiculo.precoVenda)}</p>
+          <p className="mt-3 text-2xl font-medium text-tinta">{fmtMoeda(veiculo.precoVenda)}</p>
 
           {veiculo.descricao && (
-            <p className="mt-4 whitespace-pre-line text-sm text-brand-gray">{veiculo.descricao}</p>
+            <p className="mt-4 whitespace-pre-line text-sm text-tinta-suave">{veiculo.descricao}</p>
           )}
 
           <div className="mt-6">
@@ -285,18 +285,22 @@ function Seletor({
   valor,
   onChange,
   children,
+  className = "",
 }: {
   rotulo: string;
   valor: string;
   onChange: (v: string) => void;
   children: React.ReactNode;
+  className?: string;
 }) {
+  // No celular: largura total da coluna e letra de 16px (abaixo disso o iPhone
+  // dá zoom na tela ao tocar). No computador, tamanho natural e text-sm.
   return (
     <select
       aria-label={rotulo}
       value={valor}
       onChange={(e) => onChange(e.target.value)}
-      className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm text-brand-graphite outline-none focus:border-brand-red"
+      className={`h-10 w-full rounded-md border border-campo-borda bg-cartao px-3 text-base text-tinta outline-none focus:border-brand-red sm:w-auto sm:text-sm ${className}`}
     >
       {children}
     </select>
@@ -352,19 +356,22 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
   }
 
   return (
-    <section id="estoque" className="bg-white px-6 py-24">
-      <h2 className="af-reveal mx-auto mb-6 max-w-5xl text-center text-2xl font-medium text-brand-graphite">
+    <section id="estoque" className="bg-faixa-clara px-6 pb-24 pt-14">
+      <h2
+        className="af-reveal mx-auto mb-8 max-w-5xl text-center text-3xl font-medium italic text-tinta"
+        style={{ fontFamily: "var(--font-wordmark)" }}
+      >
         Estoque disponível
       </h2>
 
       {veiculos.length === 0 ? (
-        <p className="text-center text-brand-gray">
+        <p className="text-center text-tinta-suave">
           Nenhum veículo disponível no momento — volte em breve.
         </p>
       ) : (
         <>
           {/* Filtros */}
-          <div className="mx-auto mb-3 flex max-w-5xl flex-wrap items-center justify-center gap-2">
+          <div className="mx-auto mb-3 grid max-w-5xl grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center">
             <Seletor rotulo="Tipo de veículo" valor={tipo} onChange={setTipo}>
               <option value="todos">Carros e motos</option>
               <option value="CARRO">Carros</option>
@@ -394,7 +401,7 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
               ))}
             </Seletor>
 
-            <Seletor rotulo="Ordenar por" valor={ordem} onChange={setOrdem}>
+            <Seletor rotulo="Ordenar por" valor={ordem} onChange={setOrdem} className="col-span-2">
               {ORDENACOES.map((o) => (
                 <option key={o.valor} value={o.valor}>
                   {o.label}
@@ -404,7 +411,7 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
           </div>
 
           {/* Resultado */}
-          <div className="mx-auto mb-8 flex max-w-5xl items-center justify-center gap-3 text-sm text-brand-gray">
+          <div className="mx-auto mb-8 flex max-w-5xl items-center justify-center gap-3 text-sm text-tinta-suave">
             <span>
               {filtrados.length}{" "}
               {filtrados.length === 1 ? "veículo encontrado" : "veículos encontrados"}
@@ -413,7 +420,7 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
               <button
                 type="button"
                 onClick={limparFiltros}
-                className="underline transition-colors hover:text-brand-graphite"
+                className="underline transition-colors hover:text-tinta"
               >
                 Limpar filtros
               </button>
@@ -422,13 +429,13 @@ export function EstoquePublico({ veiculos }: { veiculos: VeiculoPublico[] }) {
 
           {filtrados.length === 0 ? (
             <div className="flex flex-col items-center gap-3">
-              <p className="text-center text-brand-gray">
+              <p className="text-center text-tinta-suave">
                 Nenhum veículo com esses filtros. Tente ampliar a busca.
               </p>
               <button
                 type="button"
                 onClick={limparFiltros}
-                className="rounded-md border border-zinc-300 px-4 py-2 text-sm text-brand-graphite transition-colors hover:bg-zinc-50"
+                className="rounded-md border border-campo-borda px-4 py-2 text-sm text-tinta transition-colors hover:bg-foto-vazia"
               >
                 Limpar filtros
               </button>

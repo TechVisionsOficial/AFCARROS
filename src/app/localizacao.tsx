@@ -27,7 +27,7 @@ function IconeRota({ className }: { className?: string }) {
 
 export function Localizacao() {
   return (
-    <section id="localizacao" className="bg-brand-graphite px-6 py-24">
+    <section id="localizacao" className="bg-faixa-clara px-6 py-24">
       <div className="mx-auto max-w-5xl">
         <div className="af-reveal">
           <p
@@ -37,7 +37,7 @@ export function Localizacao() {
             VISITE A LOJA
           </p>
           <h2
-            className="mt-2 text-3xl font-medium italic text-white"
+            className="mt-2 text-3xl font-medium italic text-tinta"
             style={{ fontFamily: "var(--font-wordmark)" }}
           >
             Onde estamos
@@ -49,46 +49,46 @@ export function Localizacao() {
             href={GOOGLE_MAPS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative flex min-h-80 flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 text-center transition-colors hover:bg-white/10"
+            className="group relative flex min-h-80 flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-borda bg-cartao p-8 text-center transition-colors hover:bg-foto-vazia"
           >
             <div
               className="pointer-events-none absolute inset-0"
               style={{
                 opacity: 0.04,
                 backgroundImage:
-                  "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
+                  "linear-gradient(var(--tinta) 1px, transparent 1px), linear-gradient(90deg, var(--tinta) 1px, transparent 1px)",
                 backgroundSize: "28px 28px",
               }}
             />
             <IconePino className="h-9 w-9 shrink-0 text-brand-red" />
             <div>
-              <p className="text-base font-medium text-white">{ENDERECO}</p>
-              <p className="mt-1 text-sm text-white/60">{CIDADE_UF}</p>
+              <p className="text-base font-medium text-tinta">{ENDERECO}</p>
+              <p className="mt-1 text-sm text-tinta-suave">{CIDADE_UF}</p>
             </div>
-            <span className="rounded-md bg-white px-4 py-2 text-sm font-medium text-brand-graphite transition-opacity group-hover:opacity-90">
+            <span className="rounded-md bg-botao px-4 py-2 text-sm font-medium text-botao-texto transition-opacity group-hover:opacity-90">
               Ver no mapa
             </span>
           </a>
 
-          <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="flex flex-col justify-between rounded-2xl border border-borda bg-cartao p-6">
             <div>
               <p
-                className="text-xs text-white/50"
+                className="text-xs text-tinta-suave"
                 style={{ fontFamily: "var(--font-support)", letterSpacing: "2px" }}
               >
                 ENDEREÇO
               </p>
-              <p className="mt-1 text-lg font-medium text-white">{ENDERECO}</p>
-              <p className="text-sm text-white/60">{CIDADE_UF}</p>
+              <p className="mt-1 text-lg font-medium text-tinta">{ENDERECO}</p>
+              <p className="text-sm text-tinta-suave">{CIDADE_UF}</p>
 
               <p
-                className="mt-6 text-xs text-white/50"
+                className="mt-6 text-xs text-tinta-suave"
                 style={{ fontFamily: "var(--font-support)", letterSpacing: "2px" }}
               >
                 HORÁRIO
               </p>
               {HORARIOS.map((h) => (
-                <p key={h.dias} className="mt-1 text-sm text-white/80">
+                <p key={h.dias} className="mt-1 text-sm text-tinta">
                   {h.dias} · {h.horario}
                 </p>
               ))}
@@ -99,13 +99,13 @@ export function Localizacao() {
                 href={linkWhatsapp("Olá! Gostaria de agendar uma visita na loja.")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-11 items-center justify-center rounded-md bg-white text-sm font-medium text-brand-graphite transition-opacity hover:opacity-90"
+                className="flex h-11 items-center justify-center rounded-md bg-botao text-sm font-medium text-botao-texto transition-opacity hover:opacity-90"
               >
                 Agendar visita no WhatsApp
               </a>
 
               <p
-                className="mt-2 text-xs text-white/50"
+                className="mt-2 text-xs text-tinta-suave"
                 style={{ fontFamily: "var(--font-support)", letterSpacing: "2px" }}
               >
                 TRAÇAR ROTA
@@ -115,7 +115,7 @@ export function Localizacao() {
                   href={GOOGLE_MAPS_ROTA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 items-center justify-center gap-2 rounded-md border border-white/20 text-sm text-white transition-colors hover:bg-white/10"
+                  className="flex h-11 items-center justify-center gap-2 rounded-md border border-campo-borda text-sm text-tinta transition-colors hover:bg-foto-vazia"
                 >
                   <IconeRota className="h-4 w-4" />
                   Google Maps
@@ -124,7 +124,7 @@ export function Localizacao() {
                   href={WAZE_ROTA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 items-center justify-center gap-2 rounded-md border border-white/20 text-sm text-white transition-colors hover:bg-white/10"
+                  className="flex h-11 items-center justify-center gap-2 rounded-md border border-campo-borda text-sm text-tinta transition-colors hover:bg-foto-vazia"
                 >
                   <IconeRota className="h-4 w-4" />
                   Waze

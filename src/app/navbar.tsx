@@ -1,8 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import { linkWhatsapp } from "@/lib/contato";
+import { BotaoTema } from "./botao-tema";
 
 const LINKS = [
   { href: "#estoque", label: "Estoque" },
@@ -10,33 +8,20 @@ const LINKS = [
   { href: "#localizacao", label: "Onde estamos" },
 ];
 
+// Sempre visível e escura: emenda com o banner no topo e continua apresentando
+// a marca quando a pessoa rola pelo estoque.
 export function Navbar() {
-  const [visivel, setVisivel] = useState(false);
-
-  useEffect(() => {
-    function aoRolar() {
-      setVisivel(window.scrollY > window.innerHeight * 0.7);
-    }
-    aoRolar();
-    window.addEventListener("scroll", aoRolar, { passive: true });
-    return () => window.removeEventListener("scroll", aoRolar);
-  }, []);
-
   return (
-    <nav
-      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-black/5 bg-white/90 px-4 py-3 backdrop-blur-sm transition-all duration-300 sm:px-6 ${
-        visivel ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-4 opacity-0"
-      }`}
-    >
+    <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-white/10 bg-faixa-escura/90 px-4 py-3 backdrop-blur-sm sm:px-6">
       <a
         href="#inicio"
-        className="flex shrink-0 items-center rounded-full bg-brand-graphite px-4 py-2"
+        className="flex shrink-0 items-center rounded-full bg-white/10 px-4 py-2.5 ring-1 ring-white/15"
       >
         <Image
-          src="/branding/logo-fundo-escuro.png"
+          src="/branding/logo-para-fundo-escuro.png"
           alt="AFCARROS — início"
-          width={112}
-          height={31}
+          width={120}
+          height={20}
         />
       </a>
 
@@ -46,13 +31,14 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-brand-graphite transition-colors hover:text-brand-red"
+              className="text-sm text-white/80 transition-colors hover:text-white"
               style={{ fontFamily: "var(--font-support)" }}
             >
               {link.label}
             </a>
           ))}
         </div>
+        <BotaoTema />
         <a
           href={linkWhatsapp("Olá! Vim pelo site da AFCARROS.")}
           target="_blank"

@@ -6,6 +6,91 @@
   --brand-red: #da1f2b;
   --brand-graphite: #141416;
   --brand-gray: #6f6d66;
+
+  /*
+    Site público (vitrine): as seções intercalam uma faixa ESCURA (grafite da
+    marca) e uma CLARA. Cada cor tem nome e um valor para o modo claro e outro
+    para o escuro (abaixo). O painel não usa estes nomes, então não muda.
+  */
+  --faixa-clara: #ffffff;
+  --faixa-escura: #141416;
+  --tinta: #141416; /* texto principal nas faixas claras */
+  --tinta-suave: #6f6d66; /* texto secundário nas faixas claras */
+  --cartao: #ffffff; /* cartões e campos sobre a faixa clara */
+  --borda: #e4e4e7;
+  --campo-borda: #d4d4d8;
+  --foto-vazia: #f4f4f5; /* fundo de foto ausente / hover leve */
+  --botao: #141416; /* botão principal sobre faixa clara */
+  --botao-texto: #ffffff;
+}
+
+/*
+  Modo escuro. Vale em dois casos:
+  - o aparelho está no escuro e a pessoa não escolheu o claro no botão; ou
+  - a pessoa escolheu o escuro no botão (data-tema="escuro" no <html>, posto
+    pelo script do <head> em layout.tsx e pelo BotaoTema).
+  A faixa "clara" vira um cinza-escuro e a escura fica mais funda, para a
+  alternância continuar visível; texto e botão principal se invertem.
+  (Os dois blocos têm os mesmos valores: CSS não junta @media com seletor.)
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --faixa-clara: #1c1c20;
+    --faixa-escura: #0e0e10;
+    --tinta: #f4f4f5;
+    --tinta-suave: #a8a6a0;
+    --cartao: #26262b;
+    --borda: rgb(255 255 255 / 0.1);
+    --campo-borda: rgb(255 255 255 / 0.2);
+    --foto-vazia: #2e2e34;
+    --botao: #f4f4f5;
+    --botao-texto: #141416;
+  }
+}
+:root[data-tema="escuro"] {
+  --faixa-clara: #1c1c20;
+  --faixa-escura: #0e0e10;
+  --tinta: #f4f4f5;
+  --tinta-suave: #a8a6a0;
+  --cartao: #26262b;
+  --borda: rgb(255 255 255 / 0.1);
+  --campo-borda: rgb(255 255 255 / 0.2);
+  --foto-vazia: #2e2e34;
+  --botao: #f4f4f5;
+  --botao-texto: #141416;
+}
+
+/* Controles nativos (lista dos filtros, rolagem) acompanham o modo, só no site. */
+.site-publico {
+  color-scheme: light dark;
+}
+:root[data-tema="claro"] .site-publico {
+  color-scheme: light;
+}
+:root[data-tema="escuro"] .site-publico {
+  color-scheme: dark;
+}
+
+/* Ícone do BotaoTema: lua no modo claro, sol no escuro — só por CSS. */
+.so-tema-claro {
+  display: inline-flex;
+}
+.so-tema-escuro {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .so-tema-claro {
+    display: none;
+  }
+  :root:not([data-tema="claro"]) .so-tema-escuro {
+    display: inline-flex;
+  }
+}
+:root[data-tema="escuro"] .so-tema-claro {
+  display: none;
+}
+:root[data-tema="escuro"] .so-tema-escuro {
+  display: inline-flex;
 }
 
 @theme inline {
@@ -14,8 +99,32 @@
   --color-brand-red: var(--brand-red);
   --color-brand-graphite: var(--brand-graphite);
   --color-brand-gray: var(--brand-gray);
+  --color-faixa-clara: var(--faixa-clara);
+  --color-faixa-escura: var(--faixa-escura);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-cartao: var(--cartao);
+  --color-borda: var(--borda);
+  --color-campo-borda: var(--campo-borda);
+  --color-foto-vazia: var(--foto-vazia);
+  --color-botao: var(--botao);
+  --color-botao-texto: var(--botao-texto);
   --font-wordmark: var(--font-wordmark);
   --font-support: var(--font-support);
+}
+
+/* Barra do topo é fixa: ao clicar em Estoque/Sobre/Onde estamos, a seção
+   para logo abaixo dela em vez de ficar escondida atrás. */
+html {
+  scroll-padding-top: 80px;
+}
+
+/* Rolagem suave ao clicar nos links do topo (só no site público, e respeitando
+   quem pediu ao aparelho para reduzir animações). */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.site-publico) {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -57,10 +166,6 @@ body {
   from { opacity: 0; transform: translateX(28px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes af-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
-}
 /* Entrada do modal da galeria (antes era feita pelo framer-motion, que
    atrapalhava o toque nas setas no celular). */
 @keyframes af-modal-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -76,7 +181,6 @@ body {
   .af-delay-1 { animation-delay: 0.1s; }
   .af-delay-2 { animation-delay: 0.2s; }
   .af-delay-3 { animation-delay: 0.3s; }
-  .af-bounce { animation: af-bounce 1.4s ease-in-out infinite; }
   .af-modal-overlay { animation: af-modal-fade 0.2s ease-out both; }
   .af-modal-card { animation: af-modal-pop 0.2s ease-out both; }
 }
