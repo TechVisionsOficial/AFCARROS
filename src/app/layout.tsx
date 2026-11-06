@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Saira_Condensed, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -54,7 +55,24 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${sairaCondensed.variable} ${spaceGrotesk.variable} antialiased`}
+      // O script abaixo põe data-tema no <html> antes do React hidratar.
+      suppressHydrationWarning
     >
+      <head>
+        {/*
+          Aplica o modo escolhido no botão (salvo no navegador) antes da página
+          aparecer, para não piscar no modo errado. Sem escolha salva, nada
+          muda e o site segue o modo do aparelho. Se o storage falhar, idem.
+        */}
+        <Script
+          id="tema-salvo"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var t=localStorage.getItem("afcarros-tema");if(t==="claro"||t==="escuro")document.documentElement.dataset.tema=t}catch(e){}',
+          }}
+        />
+      </head>
       <body className="flex min-h-screen flex-col">
         {children}
         <Analytics />

@@ -6,10 +6,10 @@ export function Rodape() {
   return (
     <footer className="flex flex-col items-center gap-6 bg-faixa-escura px-6 py-12">
       <Image
-        src="/branding/logo-fundo-escuro.png"
+        src="/branding/logo-para-fundo-escuro.png"
         alt="AFCARROS"
-        width={180}
-        height={50}
+        width={160}
+        height={26}
         className="h-auto w-auto"
       />
       <div className="flex gap-4">

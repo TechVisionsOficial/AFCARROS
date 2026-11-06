@@ -25,12 +25,16 @@
 }
 
 /*
-  Modo escuro (segue a configuração do aparelho). A faixa "clara" vira um
-  cinza-escuro e a escura fica mais funda, para a alternância continuar
-  visível; texto e botão principal se invertem.
+  Modo escuro. Vale em dois casos:
+  - o aparelho está no escuro e a pessoa não escolheu o claro no botão; ou
+  - a pessoa escolheu o escuro no botão (data-tema="escuro" no <html>, posto
+    pelo script do <head> em layout.tsx e pelo BotaoTema).
+  A faixa "clara" vira um cinza-escuro e a escura fica mais funda, para a
+  alternância continuar visível; texto e botão principal se invertem.
+  (Os dois blocos têm os mesmos valores: CSS não junta @media com seletor.)
 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-tema="claro"]) {
     --faixa-clara: #1c1c20;
     --faixa-escura: #0e0e10;
     --tinta: #f4f4f5;
@@ -43,10 +47,50 @@
     --botao-texto: #141416;
   }
 }
+:root[data-tema="escuro"] {
+  --faixa-clara: #1c1c20;
+  --faixa-escura: #0e0e10;
+  --tinta: #f4f4f5;
+  --tinta-suave: #a8a6a0;
+  --cartao: #26262b;
+  --borda: rgb(255 255 255 / 0.1);
+  --campo-borda: rgb(255 255 255 / 0.2);
+  --foto-vazia: #2e2e34;
+  --botao: #f4f4f5;
+  --botao-texto: #141416;
+}
 
 /* Controles nativos (lista dos filtros, rolagem) acompanham o modo, só no site. */
 .site-publico {
   color-scheme: light dark;
+}
+:root[data-tema="claro"] .site-publico {
+  color-scheme: light;
+}
+:root[data-tema="escuro"] .site-publico {
+  color-scheme: dark;
+}
+
+/* Ícone do BotaoTema: lua no modo claro, sol no escuro — só por CSS. */
+.so-tema-claro {
+  display: inline-flex;
+}
+.so-tema-escuro {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .so-tema-claro {
+    display: none;
+  }
+  :root:not([data-tema="claro"]) .so-tema-escuro {
+    display: inline-flex;
+  }
+}
+:root[data-tema="escuro"] .so-tema-claro {
+  display: none;
+}
+:root[data-tema="escuro"] .so-tema-escuro {
+  display: inline-flex;
 }
 
 @theme inline {

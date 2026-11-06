@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { linkWhatsapp } from "@/lib/contato";
+import { BotaoTema } from "./botao-tema";
 
 const LINKS = [
   { href: "#estoque", label: "Estoque" },
@@ -14,13 +15,13 @@ export function Navbar() {
     <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-white/10 bg-faixa-escura/90 px-4 py-3 backdrop-blur-sm sm:px-6">
       <a
         href="#inicio"
-        className="flex shrink-0 items-center py-2"
+        className="flex shrink-0 items-center rounded-full bg-white/10 px-4 py-2.5 ring-1 ring-white/15"
       >
         <Image
-          src="/branding/logo-fundo-escuro.png"
+          src="/branding/logo-para-fundo-escuro.png"
           alt="AFCARROS — início"
-          width={112}
-          height={31}
+          width={120}
+          height={20}
         />
       </a>
 
@@ -37,6 +38,7 @@ export function Navbar() {
             </a>
           ))}
         </div>
+        <BotaoTema />
         <a
           href={linkWhatsapp("Olá! Vim pelo site da AFCARROS.")}
           target="_blank"
